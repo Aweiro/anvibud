@@ -136,12 +136,15 @@ export function ProductCard({
       addToWishlist({
         id,
         title,
-        price: finalPrice,
+        price, // Base price
         image: typeof carouselImages[0] === "string" ? (carouselImages[0] as string) : undefined,
         hoverImage: typeof carouselImages[1] === "string" ? (carouselImages[1] as string) : undefined,
         allImages: carouselImages.every(img => typeof img === 'string') ? carouselImages as string[] : undefined,
         slug: slug ?? "",
         sizes,
+        selectedSize,
+        sizeVariants,
+        baseSize,
       });
     }
   };

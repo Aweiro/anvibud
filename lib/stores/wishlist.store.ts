@@ -12,6 +12,9 @@ export type WishlistProduct = {
     allImages?: string[];
     slug: string;
     sizes?: string[];
+    selectedSize?: string | null;
+    sizeVariants?: { size: string, price: string, salePrice?: string, stock?: string }[];
+    baseSize?: string;
     label?: 'BESTSELLER' | 'NEW' | 'SALE' | null;
 };
 

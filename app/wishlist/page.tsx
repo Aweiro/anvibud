@@ -17,11 +17,38 @@ interface WishlistItemProps {
 function WishlistItem({ item, onRemove }: WishlistItemProps) {
     const { t } = useLanguage();
     const addToCart = useCartStore((state) => state.addToCart);
-    const [selectedSize, setSelectedSize] = useState<string | null>(null);
+    const [selectedSize, setSelectedSize] = useState<string | null>(item.selectedSize || null);
+    const [displayPrice, setDisplayPrice] = useState<number>(item.price);
+    const [originalPrice, setOriginalPrice] = useState<number | null>(null);
     const [showSizeError, setShowSizeError] = useState(false);
     const [isAdded, setIsAdded] = useState(false);
     const [currentImgIdx, setCurrentImgIdx] = useState(0);
     const router = useRouter();
+
+    useEffect(() => {
+        let matched = false;
+        if (selectedSize && item.sizeVariants && item.sizeVariants.length > 0) {
+            const variant = item.sizeVariants.find(v => v.size === selectedSize);
+            if (variant) {
+                const vPrice = parseFloat(variant.price);
+                const vSalePrice = variant.salePrice ? parseFloat(variant.salePrice) : null;
+                
+                if (vSalePrice) {
+                    setDisplayPrice(vSalePrice);
+                    setOriginalPrice(vPrice);
+                } else {
+                    setDisplayPrice(vPrice);
+                    setOriginalPrice(null);
+                }
+                matched = true;
+            }
+        }
+        
+        if (!matched) {
+            setDisplayPrice(item.price);
+            setOriginalPrice(null); 
+        }
+    }, [selectedSize, item]);
 
     const handleAddToCart = () => {
         if (item.sizes && item.sizes.length > 0 && !selectedSize) {
@@ -35,7 +62,7 @@ function WishlistItem({ item, onRemove }: WishlistItemProps) {
             baseId: item.id,
             size: selectedSize || undefined,
             title: selectedSize ? `${item.title} / ${selectedSize}` : item.title,
-            price: item.price,
+            price: displayPrice,
             image: item.image
         });
 
@@ -69,36 +96,50 @@ function WishlistItem({ item, onRemove }: WishlistItemProps) {
                         )}
                         {/* Desktop View: Smooth Hover */}
                         <div className="hidden md:block absolute inset-0">
-                            <Image
-                                src={item.image}
-                                alt={item.title}
-                                fill
-                                className={`object-cover transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] ${item.hoverImage ? "group-hover:opacity-0 group-hover:scale-105 group-hover:-translate-x-3 group-hover:blur-sm" : "group-hover:opacity-90"}`}
-                                sizes="25vw"
-                            />
-                            {item.hoverImage && (
-                                <Image
-                                    src={item.hoverImage}
-                                    alt={`${item.title} - alternative view`}
-                                    fill
-                                    className="object-cover opacity-0 group-hover:opacity-100 transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] scale-110 group-hover:scale-100 translate-x-3 group-hover:translate-x-0"
-                                    sizes="25vw"
-                                />
+                            {item.image ? (
+                                <>
+                                    <Image
+                                        src={item.image}
+                                        alt={item.title}
+                                        fill
+                                        className={`object-cover transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] ${item.hoverImage ? "group-hover:opacity-0 group-hover:scale-105 group-hover:-translate-x-3 group-hover:blur-sm" : "group-hover:opacity-90"}`}
+                                        sizes="25vw"
+                                    />
+                                    {item.hoverImage && (
+                                        <Image
+                                            src={item.hoverImage}
+                                            alt={`${item.title} - alternative view`}
+                                            fill
+                                            className="object-cover opacity-0 group-hover:opacity-100 transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] scale-110 group-hover:scale-100 translate-x-3 group-hover:translate-x-0"
+                                            sizes="25vw"
+                                        />
+                                    )}
+                                </>
+                            ) : (
+                                <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-[8px] font-black uppercase text-black/10 dark:text-white/10">
+                                    N/A
+                                </div>
                             )}
                         </div>
 
                         {/* Mobile View: Carousel with Arrows */}
                         <div className="md:hidden absolute inset-0">
-                            {(item.allImages || [item.image, item.hoverImage].filter(Boolean)).map((img: any, idx: number) => (
-                                <Image
-                                    key={idx}
-                                    src={img}
-                                    alt={`${item.title} - view ${idx + 1}`}
-                                    fill
-                                    className={`object-cover transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${idx === currentImgIdx ? "opacity-100 translate-x-0" : "opacity-0 translate-x-[15%]"}`}
-                                    sizes="50vw"
-                                />
-                            ))}
+                            {(item.allImages?.length ? item.allImages : [item.image, item.hoverImage].filter(Boolean)).length > 0 ? (
+                                (item.allImages || [item.image, item.hoverImage].filter(Boolean)).map((img: any, idx: number) => (
+                                    <Image
+                                        key={idx}
+                                        src={img}
+                                        alt={`${item.title} - view ${idx + 1}`}
+                                        fill
+                                        className={`object-cover transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${idx === currentImgIdx ? "opacity-100 translate-x-0" : "opacity-0 translate-x-[15%]"}`}
+                                        sizes="50vw"
+                                    />
+                                ))
+                            ) : (
+                                <div className="w-full h-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-[8px] font-black uppercase text-black/10 dark:text-white/10">
+                                    N/A
+                                </div>
+                            )}
 
                             {/* Arrows for Mobile */}
                             {(item.allImages?.length || [item.image, item.hoverImage].filter(Boolean).length) > 1 && (
@@ -139,7 +180,12 @@ function WishlistItem({ item, onRemove }: WishlistItemProps) {
                         <h2 className="text-[10px] uppercase tracking-[0.2em] font-black text-black leading-tight truncate">{item.title}</h2>
                     </Link>
                     <div className="space-y-4">
-                        <p className="text-[10px] tracking-widest font-bold text-black/40">${item.price.toFixed(2)}</p>
+                        <div className="flex items-baseline gap-2">
+                            <p className="text-[10px] tracking-widest font-black text-black">₴{displayPrice.toFixed(2)}</p>
+                            {originalPrice && (
+                                <p className="text-[8px] tracking-widest font-bold text-black/20 line-through">₴{originalPrice.toFixed(2)}</p>
+                            )}
+                        </div>
 
                         {/* Size Picker - Always Visible */}
                         {item.sizes && item.sizes.length > 0 && (

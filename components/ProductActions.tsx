@@ -82,6 +82,9 @@ export function ProductActions({
                 image: product.image,
                 slug: product.slug,
                 label: product.label,
+                selectedSize: activeSize,
+                sizeVariants: sizeVariants,
+                baseSize: (product as any).baseSize,
             });
         }
     };

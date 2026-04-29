@@ -125,7 +125,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                         discountAmount: discountAmount,
                                         sizes: product.sizes,
                                         sizeVariants: product.sizeVariants as any,
-                                        baseSize: (product as any).baseSize
+                                        baseSize: (product as any).baseSize,
+                                        image: product.images[0]
                                     }}
                                     prodName={prodName}
                                 />
