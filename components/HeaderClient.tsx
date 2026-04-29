@@ -15,7 +15,8 @@ type Subcategory = {
     name_uk?: string | null;
     name_ru?: string | null;
     name_pl?: string | null;
-    slug: string
+    slug: string;
+    image?: string | null;
 };
 type Category = {
     id: string;
