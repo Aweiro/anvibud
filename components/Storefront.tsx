@@ -1,5 +1,6 @@
 import { ProductCard } from "@/components/ProductCard";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import { Footer } from "@/components/Footer";
@@ -8,6 +9,7 @@ import { getServerTranslation } from "@/lib/i18n/server";
 import { InfiniteProductGrid } from "./InfiniteProductGrid";
 import { ProductSlider } from "./ProductSlider";
 import { HeroCarousel } from "./HeroCarousel";
+import { SidebarCategories } from "./SidebarCategories";
 import { 
     Hammer, 
     Paintbrush, 
@@ -18,7 +20,11 @@ import {
     Construction, 
     Wrench,
     ArrowRight,
-    ChevronRight
+    ChevronRight,
+    MapPin,
+    Clock,
+    Truck,
+    Check
 } from "lucide-react";
 import { CategoryGrid } from "./CategoryGrid";
 import { SubcategoryGrid } from "./SubcategoryGrid";
@@ -108,6 +114,28 @@ export async function Storefront({
         };
     }
 
+    if (searchParams?.sale === 'true') {
+        const saleConditions = {
+            OR: [
+                { discountAmount: { gt: 0 } },
+                { label: 'SALE' },
+                { sizeVariants: { not: Prisma.AnyNull } }
+            ]
+        };
+        
+        if (whereClause.OR) {
+            // If we already have an OR from search, we wrap everything in AND
+            const currentOR = whereClause.OR;
+            delete whereClause.OR;
+            whereClause.AND = [
+                { OR: currentOR },
+                saleConditions
+            ];
+        } else {
+            whereClause.AND = [saleConditions];
+        }
+    }
+
     let orderBy: any = { createdAt: "desc" };
     if (sort === 'price_asc') orderBy = { price: 'asc' };
     if (sort === 'price_desc') orderBy = { price: 'desc' };
@@ -144,15 +172,54 @@ export async function Storefront({
 
     const rawFilterData = await prisma.product.findMany({
         where: baseWhereClause,
-        select: { sizes: true, brand: true }
+        select: { sizeVariants: true, brand: true, label: true }
     });
-    const filterData = JSON.parse(JSON.stringify(rawFilterData));
-    const allSizes = Array.from(new Set(filterData.flatMap((p: any) => p.sizes))) as string[];
-    const allBrands = Array.from(new Set(filterData.map((p: any) => p.brand).filter(Boolean))) as string[];
 
-    // Sort them
+    // Fetch sale products separately to ensure they are always available for the slider
+    const rawSaleProducts = await prisma.product.findMany({
+        where: { 
+            isActive: true,
+            OR: [
+                { discountAmount: { gt: 0 } },
+                { label: 'SALE' },
+                { sizeVariants: { not: Prisma.AnyNull } }
+            ]
+        },
+        include: { subcategory: { include: { category: true } } },
+        orderBy: { createdAt: 'desc' },
+        take: 30
+    });
+
+    const saleProducts: Product[] = JSON.parse(JSON.stringify(rawSaleProducts)).filter((p: any) => {
+        const hasMainDiscount = (p.discountAmount && Number(p.discountAmount) > 0) || p.label === 'SALE';
+        let hasVariantDiscount = false;
+        if (p.sizeVariants) {
+            try {
+                const variants = typeof p.sizeVariants === 'string' ? JSON.parse(p.sizeVariants) : p.sizeVariants;
+                // According to schema comments, variants use 'salePrice'
+                hasVariantDiscount = Array.isArray(variants) && variants.some((v: any) => v.salePrice && Number(v.salePrice) > 0);
+            } catch (e) {}
+        }
+        return hasMainDiscount || hasVariantDiscount;
+    });
+
+    const filterData = JSON.parse(JSON.stringify(rawFilterData));
+    const allSizes = Array.from(new Set(filterData.flatMap((p: any) => {
+        if (!p.sizeVariants) return [];
+        try {
+            const variants = typeof p.sizeVariants === 'string' ? JSON.parse(p.sizeVariants) : p.sizeVariants;
+            if (Array.isArray(variants)) {
+                return variants.map((v: any) => v.size).filter(Boolean);
+            }
+        } catch (e) {}
+        return [];
+    }))) as string[];
+    const allBrands = Array.from(new Set(filterData.map((p: any) => p.brand).filter(Boolean))) as string[];
+    const allLabels = Array.from(new Set(filterData.map((p: any) => p.label).filter(Boolean))) as string[];
+
     allSizes.sort();
     allBrands.sort();
+    allLabels.sort();
 
     // Fetch Popular Products (Bestsellers or Special Label)
     const rawPopular = await prisma.product.findMany({
@@ -187,12 +254,29 @@ export async function Storefront({
         ? `${catName} / ${subName}`
         : (lang === 'en' ? categoryData?.name : categoryData?.[`name_${lang}`] || categoryData?.name);
 
-    const categories = (!categorySlug && !subcategorySlug)
-        ? await prisma.category.findMany({
-            select: { id: true, name: true, name_uk: true, name_ru: true, name_pl: true, slug: true, image: true },
-            orderBy: { name: 'asc' }
-        })
-        : [];
+    const categories = await prisma.category.findMany({
+        select: { 
+            id: true, 
+            name: true, 
+            name_uk: true, 
+            name_ru: true, 
+            name_pl: true, 
+            slug: true, 
+            image: true,
+            subcategories: {
+                select: {
+                    id: true,
+                    name: true,
+                    name_uk: true,
+                    name_ru: true,
+                    name_pl: true,
+                    slug: true,
+                    image: true
+                }
+            }
+        },
+        orderBy: { name: 'asc' }
+    });
 
     const subcategories = categorySlug 
         ? await prisma.subcategory.findMany({
@@ -218,42 +302,14 @@ export async function Storefront({
                 <div className="mx-auto max-w-[1800px] px-0 lg:px-6 lg:mt-4">
                     <div className="flex flex-col lg:flex-row gap-0 lg:gap-6 h-auto lg:h-[600px]">
                         
-                        {/* Desktop Sidebar */}
-                        <aside className="hidden lg:flex flex-col w-[320px] bg-white border border-black/5 rounded-sm overflow-hidden shadow-sm">
-                            <div className="p-4 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-between">
-                                <span>Категорії товарів</span>
-                                <ArrowRight size={14} />
-                            </div>
-                            <nav className="flex-1 overflow-y-auto py-2">
-                                {categories.map((cat, idx) => {
-                                    // Map icons to categories (simplified logic)
-                                    const Icon = [Hammer, Droplets, Paintbrush, Zap, Home, Construction, Shovel, Wrench][idx % 8];
-                                    return (
-                                        <Link 
-                                            key={cat.id} 
-                                            href={`/${cat.slug}`}
-                                            className="group flex items-center justify-between px-4 py-3 hover:bg-zinc-50 transition-colors border-b border-black/[0.02] last:border-0"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 flex items-center justify-center bg-zinc-50 group-hover:bg-black group-hover:text-white transition-colors duration-200 rounded-sm">
-                                                    <Icon size={16} strokeWidth={1.5} />
-                                                </div>
-                                                <span className="text-[11px] font-bold uppercase tracking-wider text-black/70 group-hover:text-black transition-colors duration-200">
-                                                    {cat.name_uk || cat.name}
-                                                </span>
-                                            </div>
-                                            <ChevronRight size={12} className="text-black/10 group-hover:text-black/40 transition-transform duration-200 transform group-hover:translate-x-1" />
-                                        </Link>
-                                    );
-                                })}
-                            </nav>
-                            <div className="p-4 border-t border-black/5 bg-zinc-50/50">
-                                <Link href="/shop" className="text-[9px] font-black uppercase tracking-[0.3em] text-black/40 hover:text-black transition-colors flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-black rounded-full animate-pulse" />
-                                    Переглянути всі
-                                </Link>
-                            </div>
-                        </aside>
+                        {/* Desktop Sidebar (Client Component with Hover) */}
+                        <SidebarCategories 
+                            categories={categories as any} 
+                            lang={lang} 
+                            translations={{
+                                categories_label: "Категорії товарів"
+                            }}
+                        />
 
                         {/* Carousel Area */}
                         <div className="flex-1 min-w-0 h-[400px] md:h-[500px] lg:h-full">
@@ -366,41 +422,147 @@ export async function Storefront({
                 </div>
             )}
 
-            {/* Brand Philosophy Section (Inverse Hover: Color by default, BW on hover) */}
-            {!hideHero && !categorySlug && !subcategorySlug && (
-                <div className="bg-white pt-10 pb-0 md:py-16 mb-6 border-y border-black/5 relative z-20">
+            {/* Hot Deals Section (New Block - Fixed with global fetch) */}
+            {(!categorySlug && !subcategorySlug && !hideHero) && saleProducts.length > 0 && (
+                <div className="py-6 md:py-10 bg-white border-b border-black/5">
                     <div className="mx-auto max-w-[1800px] px-6">
-                        <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-center">
-                            <div className="flex-1 relative order-2 md:order-1">
-                                <div className="relative aspect-square w-full max-w-sm mx-auto group overflow-hidden shadow-2xl">
-                                    <Image
-                                        src="/philosophy.png"
-                                        alt="Fabric Detail"
-                                        fill
-                                        className="object-cover grayscale-0 group-hover:grayscale transition-all duration-1000"
-                                    />
-                                    <div className="absolute inset-0 border-[15px] border-white/20 m-4 pointer-events-none" />
+                        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6 border-b border-black/10 pb-10">
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                    <span className="text-[10px] uppercase tracking-[0.5em] font-black text-black/40 block">Limited Offers</span>
                                 </div>
-                                <div className="absolute -bottom-6 -right-6 hidden lg:block w-32 h-32 bg-black text-white p-6 flex items-center justify-center text-center shadow-xl z-30">
-                                    <span className="text-[8px] uppercase tracking-[0.4em] font-bold leading-relaxed">{t('philosophy.badge')}</span>
-                                </div>
+                                <h2 className="text-4xl md:text-6xl font-extrabold tracking-tighter uppercase text-black">{t('common.hot_deals')}</h2>
+                                <p className="text-[11px] uppercase tracking-[0.3em] font-bold text-black/30">{t('common.hot_deals_desc')}</p>
                             </div>
-                            <div className="flex-1 order-1 md:order-2 space-y-6">
-                                <span className="text-[10px] uppercase tracking-[0.6em] font-black text-black/30">{t('philosophy.label')}</span>
-                                <h3 className="text-3xl md:text-5xl font-extrabold tracking-tighter uppercase leading-[0.9] text-black">
-                                    {t('philosophy.title_1')} <br />{t('philosophy.title_2')} <br />{t('philosophy.title_3')}
-                                </h3>
-                                <div className="h-1 w-16 bg-black" />
-                                <p className="text-base text-black/70 font-light leading-relaxed max-w-lg italic">
+                            <Link href="/shop?sale=true" className="group flex items-center gap-6 text-[11px] uppercase tracking-[0.4em] font-black text-black hover:text-black/50 transition-all">
+                                {t('common.view_all')}
+                                <div className="relative flex items-center">
+                                    <span className="w-12 h-[1px] bg-black group-hover:w-20 transition-all duration-500" />
+                                    <ArrowRight size={14} className="absolute -right-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-0 group-hover:translate-x-2" />
+                                </div>
+                            </Link>
+                        </div>
+                        <div className="mt-4">
+                            <ProductSlider products={saleProducts.slice(0, 15)} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Brand Philosophy Section (Redesigned with Map and Pickup) */}
+            {!hideHero && !categorySlug && !subcategorySlug && (
+                <div className="bg-white pt-12 pb-16 md:py-16 border-y border-black/5 relative z-20">
+                    <div className="mx-auto max-w-[1800px] px-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+                            
+                            {/* Left Column: Philosophy Text */}
+                            <div className="lg:col-span-5 space-y-8">
+                                <div className="space-y-4">
+                                    <span className="text-[10px] uppercase tracking-[0.6em] font-black text-black/30 block">{t('philosophy.label')}</span>
+                                    <h3 className="text-4xl md:text-6xl font-extrabold tracking-tighter uppercase leading-[0.85] text-black">
+                                        {t('philosophy.title_1')} <br />{t('philosophy.title_2')} <br />{t('philosophy.title_3')}
+                                    </h3>
+                                </div>
+                                <div className="h-1 w-20 bg-black" />
+                                <p className="text-lg text-black/70 font-light leading-relaxed italic max-w-xl">
                                     {t('philosophy.desc')}
                                 </p>
-                                <div className="pt-6">
-                                    <Link href="/about" className="group flex items-center gap-4 text-[10px] uppercase tracking-[0.4em] font-black text-black hover:text-black/50 transition-colors">
+                                <div className="pt-4">
+                                    <Link href="/about" className="group inline-flex items-center gap-6 text-[11px] uppercase tracking-[0.4em] font-black text-black hover:text-black/50 transition-colors">
                                         {t('common.read_our_story')}
-                                        <span className="w-8 h-[1px] bg-black group-hover:w-16 transition-all duration-300" />
+                                        <div className="relative flex items-center justify-center">
+                                            <span className="w-12 h-[1px] bg-black group-hover:w-20 transition-all duration-500" />
+                                            <ArrowRight size={14} className="absolute -right-2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-0 group-hover:translate-x-2" />
+                                        </div>
                                     </Link>
                                 </div>
                             </div>
+
+                            {/* Right Column: Map & Pickup Info */}
+                            <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Map Container */}
+                                <div className="relative h-[350px] md:h-full min-h-[400px] rounded-sm overflow-hidden border border-black/5 shadow-2xl group">
+                                    <iframe 
+                                        src="https://maps.google.com/maps?q=48.918,24.721&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                                        width="100%" 
+                                        height="100%" 
+                                        style={{ border: 0, filter: 'grayscale(1) contrast(1.2) brightness(0.9)' }} 
+                                        allowFullScreen={false} 
+                                        loading="lazy" 
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                        className="transition-all duration-1000 group-hover:grayscale-0 group-hover:brightness-100"
+                                    ></iframe>
+                                    <div className="absolute top-4 left-4 bg-black text-white px-4 py-2 text-[9px] font-black uppercase tracking-widest shadow-xl">
+                                        Showroom_Location
+                                    </div>
+                                </div>
+
+                                {/* Pickup Card */}
+                                <div className="bg-zinc-50 p-8 md:p-10 flex flex-col justify-between border border-black/5 relative overflow-hidden group">
+                                    {/* Decoration */}
+                                    <div className="absolute -top-10 -right-10 text-[120px] font-black text-black/[0.03] select-none pointer-events-none group-hover:text-black/[0.05] transition-colors duration-700">
+                                        ANV
+                                    </div>
+
+                                    <div className="space-y-10 relative z-10">
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-3 text-black/20">
+                                                <Truck size={18} strokeWidth={1.5} />
+                                                <div className="h-[1px] w-12 bg-black/10" />
+                                            </div>
+                                            <h4 className="text-2xl font-black uppercase tracking-tighter text-black">{t('philosophy.pickup_title')}</h4>
+                                            <p className="text-[10px] uppercase tracking-widest text-black/40 font-bold leading-relaxed">{t('philosophy.pickup_desc')}</p>
+                                        </div>
+
+                                        <div className="space-y-6">
+                                            <div className="flex gap-4">
+                                                <div className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-sm flex-shrink-0">
+                                                    <MapPin size={18} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <span className="text-[9px] uppercase tracking-widest font-black text-black/30 block">{t('philosophy.address_label')}</span>
+                                                    <span className="text-[11px] font-bold uppercase tracking-tight text-black">{t('philosophy.address_value')}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-4">
+                                                <div className="w-10 h-10 flex items-center justify-center bg-white border border-black/10 text-black rounded-sm flex-shrink-0">
+                                                    <Clock size={18} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <span className="text-[9px] uppercase tracking-widest font-black text-black/30 block">{t('philosophy.hours_label')}</span>
+                                                    <span className="text-[11px] font-bold uppercase tracking-tight text-black">{t('philosophy.hours_value')}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3 pt-4 border-t border-black/5">
+                                            {[1, 2, 3].map((i) => (
+                                                <div key={i} className="flex items-center gap-3">
+                                                    <div className="w-4 h-4 rounded-full bg-black/5 flex items-center justify-center">
+                                                        <Check size={10} className="text-black/40" />
+                                                    </div>
+                                                    <span className="text-[9px] uppercase tracking-[0.15em] font-bold text-black/60">
+                                                        {t(`philosophy.pickup_benefit_${i}`)}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-8">
+                                        <a 
+                                            href="https://maps.app.goo.gl/5NWtsgxGN65sK1Qm8" 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="block w-full bg-black text-white text-center py-4 text-[9px] font-black uppercase tracking-[0.3em] hover:bg-zinc-800 transition-all active:scale-[0.98] shadow-lg shadow-black/10"
+                                        >
+                                            Маршрут у Google Maps
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -413,7 +575,7 @@ export async function Storefront({
 
             {/* Product Grid (Moved Up) */}
             <div className="mx-auto max-w-[1800px] px-6 pb-10">
-                <div className="flex items-center justify-between mb-4 md:mb-8 border-b border-black pb-4 gap-4">
+                <div className="flex items-center justify-between mt-6 mb-4 md:mb-8 border-b border-black pb-4 gap-4">
                     <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 overflow-hidden">
                         <h3 className="text-[11px] uppercase tracking-[0.5em] font-black text-black truncate">
                             {totalProducts > 0 ? (categorySlug ? t('common.department_selection') : t('common.current_collection')) : t('common.end_of_library')}

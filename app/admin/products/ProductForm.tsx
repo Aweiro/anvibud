@@ -263,8 +263,8 @@ export default function ProductForm({
         formData.set("subcategoryId", selectedSubcategoryId);
         formData.set("label", selectedLabel);
         formData.set("brand", brandQuery);
-        formData.set("specifications", JSON.stringify(specifications.filter(s => s.key.trim() !== "" && s.value.trim() !== "")));
-        formData.set("sizeVariants", JSON.stringify(sizeVariants.filter(v => v.size.trim() !== "" && v.price.trim() !== "")));
+        formData.set("specifications", JSON.stringify(specifications.filter(s => s.key && s.value && String(s.key).trim() !== "" && String(s.value).trim() !== "")));
+        formData.set("sizeVariants", JSON.stringify(sizeVariants.filter(v => v.size.trim() !== "" && v.price !== null && v.price !== undefined && String(v.price).trim() !== "")));
 
         // Remove the original images from formData to avoid sending them to the server
         formData.delete("images");

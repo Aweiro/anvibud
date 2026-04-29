@@ -22,7 +22,7 @@ export async function AnnouncementBar() {
                 backgroundColor: settings.announcementBgColor || "#000000",
                 color: settings.announcementTextColor || "#ffffff"
             }}
-            className="announcement-bar w-full py-2.5 px-4 overflow-hidden relative z-[10005] border-b border-white/5"
+            className="announcement-bar w-full py-2.5 px-4 overflow-hidden relative z-[40] border-b border-white/5"
         >
             <div className="mx-auto max-w-[1800px]">
                 <div 
