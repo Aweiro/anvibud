@@ -120,6 +120,8 @@ export function InfiniteProductGrid({
                         sizes={product.sizes}
                         label={product.label as any}
                         specifications={product.specifications}
+                        sizeVariants={product.sizeVariants}
+                        baseSize={product.baseSize}
                     />
                 ))}
 

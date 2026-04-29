@@ -153,11 +153,23 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
                                             )}
                                         </td>
                                         <td className="px-6 py-6">
-                                            <div className="flex items-center gap-2">
-                                                <div className={`w-0.5 h-3 ${product.stock > 10 ? "bg-black dark:bg-white" : "bg-red-500"}`} />
-                                                <span className={`text-[9px] uppercase font-black tracking-widest ${product.stock > 0 ? "text-black dark:text-white" : "text-red-500"}`}>
-                                                    {product.stock}U_QTY
-                                                </span>
+                                            <div className="flex flex-col gap-1.5 min-w-[120px]">
+                                                {/* Base product stock */}
+                                                <div className="flex items-center gap-2">
+                                                    <div className={`w-0.5 h-3 ${product.stock > 10 ? "bg-black dark:bg-white" : "bg-red-500"}`} />
+                                                    <span className={`text-[9px] uppercase font-black tracking-widest ${product.stock > 0 ? "text-black dark:text-white" : "text-red-500"}`}>
+                                                        {product.baseSize ? `${product.baseSize}: ` : ""}{product.stock}U
+                                                    </span>
+                                                </div>
+                                                {/* Variants stocks */}
+                                                {(product.sizeVariants as any[])?.map((v, i) => (
+                                                    <div key={i} className="flex items-center gap-2 opacity-60">
+                                                        <div className={`w-0.5 h-2 ${Number(v.stock) > 5 ? "bg-black/40 dark:bg-white/40" : "bg-red-400"}`} />
+                                                        <span className={`text-[8px] uppercase font-bold tracking-widest ${Number(v.stock) > 0 ? "text-black/60 dark:text-white/60" : "text-red-400"}`}>
+                                                            {v.size}: {v.stock || 0}U
+                                                        </span>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </td>
                                         <td className="px-6 py-6 text-right">
@@ -234,7 +246,16 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
                                     </div>
                                     <div className="space-y-1 text-right">
                                         <span className="text-[8px] uppercase font-black text-black/30 dark:text-white/30 tracking-widest">Inventory</span>
-                                        <div className={`text-[11px] font-black tracking-widest ${product.stock > 0 ? "text-black dark:text-white" : "text-red-500"}`}>{product.stock}U_QTY</div>
+                                        <div className="space-y-1">
+                                            <div className={`text-[11px] font-black tracking-widest ${product.stock > 0 ? "text-black dark:text-white" : "text-red-500"}`}>
+                                                {product.baseSize ? `${product.baseSize}: ` : ""}{product.stock}U
+                                            </div>
+                                            {(product.sizeVariants as any[])?.map((v, i) => (
+                                                <div key={i} className={`text-[9px] font-bold tracking-widest opacity-60 ${Number(v.stock) > 0 ? "text-black/60 dark:text-white/60" : "text-red-400"}`}>
+                                                    {v.size}: {v.stock || 0}U
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

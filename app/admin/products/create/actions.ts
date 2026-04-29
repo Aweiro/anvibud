@@ -21,19 +21,28 @@ export async function submitProduct(formData: FormData) {
     const salePriceStr = formData.get("salePrice") as string;
     const stockStr = formData.get("stock") as string;
     const subcategoryId = formData.get("subcategoryId") as string;
+    const baseSize = formData.get("baseSize") as string;
     const sizesStr = formData.get("sizes") as string;
     const brand = formData.get("brand") as string;
     const isCustomOrder = formData.get("isCustomOrder") === "on";
     const label = (formData.get("label") as any) || null;
     const specificationsStr = formData.get("specifications") as string;
     const specifications = specificationsStr ? JSON.parse(specificationsStr) : [];
+    const sizeVariantsStr = formData.get("sizeVariants") as string;
+    const sizeVariants = sizeVariantsStr ? JSON.parse(sizeVariantsStr).map((v: any) => ({
+      ...v,
+      price: parseFloat(v.price),
+      salePrice: v.salePrice ? parseFloat(v.salePrice) : null,
+      stock: v.stock ? parseInt(v.stock, 10) : null
+    })) : [];
 
+    const directImageUrls = formData.getAll("imageUrls") as string[];
     const files = formData.getAll("images") as File[];
-    const imageUrls: string[] = [];
+    const imageUrls: string[] = [...directImageUrls];
 
-    // Upload files to cloudinary
+    // Upload any remaining files to cloudinary (fallback)
     for (const file of files) {
-      if (file && file.size > 0) {
+      if (file && file.size > 0 && typeof file !== "string") {
         const url = await uploadImage(file);
         imageUrls.push(url);
       }
@@ -48,7 +57,15 @@ export async function submitProduct(formData: FormData) {
     if (salePrice !== null && salePrice < price) {
       discountAmount = price - salePrice;
     }
-    const sizes = sizesStr ? sizesStr.split(",").map(s => s.trim()).filter(Boolean) : [];
+    
+    // If we have sizeVariants, we use them to populate the 'sizes' array for compatibility
+    let sizes = sizeVariants.length > 0 
+      ? sizeVariants.map((v: any) => v.size) 
+      : (sizesStr ? sizesStr.split(",").map(s => s.trim()).filter(Boolean) : []);
+    
+    if (baseSize && !sizes.includes(baseSize)) {
+      sizes = [baseSize, ...sizes];
+    }
 
     await createProduct({
       name,
@@ -70,6 +87,8 @@ export async function submitProduct(formData: FormData) {
       isCustomOrder,
       label,
       specifications,
+      sizeVariants,
+      baseSize,
     });
 
     revalidatePath("/admin/products");
@@ -103,19 +122,28 @@ export async function editProductAction(id: string, formData: FormData, existing
     const salePriceStr = formData.get("salePrice") as string;
     const stockStr = formData.get("stock") as string;
     const subcategoryId = formData.get("subcategoryId") as string;
+    const baseSize = formData.get("baseSize") as string;
     const sizesStr = formData.get("sizes") as string;
     const brand = formData.get("brand") as string;
     const isCustomOrder = formData.get("isCustomOrder") === "on";
     const label = (formData.get("label") as any) || null;
     const specificationsStr = formData.get("specifications") as string;
     const specifications = specificationsStr ? JSON.parse(specificationsStr) : [];
+    const sizeVariantsStr = formData.get("sizeVariants") as string;
+    const sizeVariants = sizeVariantsStr ? JSON.parse(sizeVariantsStr).map((v: any) => ({
+      ...v,
+      price: parseFloat(v.price),
+      salePrice: v.salePrice ? parseFloat(v.salePrice) : null,
+      stock: v.stock ? parseInt(v.stock, 10) : null
+    })) : [];
 
+    const directImageUrls = formData.getAll("imageUrls") as string[];
     const files = formData.getAll("images") as File[];
-    const uploadedImageUrls: string[] = [];
+    const uploadedImageUrls: string[] = [...directImageUrls];
 
-    // Upload new files to cloudinary
+    // Upload any remaining files to cloudinary (fallback)
     for (const file of files) {
-      if (file && file.size > 0) {
+      if (file && file.size > 0 && typeof file !== "string") {
         const url = await uploadImage(file);
         uploadedImageUrls.push(url);
       }
@@ -130,7 +158,14 @@ export async function editProductAction(id: string, formData: FormData, existing
     if (salePrice !== null && salePrice < price) {
       discountAmount = price - salePrice;
     }
-    const sizes = sizesStr ? sizesStr.split(",").map(s => s.trim()).filter(Boolean) : [];
+    
+    let sizes = sizeVariants.length > 0 
+      ? sizeVariants.map((v: any) => v.size) 
+      : (sizesStr ? sizesStr.split(",").map(s => s.trim()).filter(Boolean) : []);
+
+    if (baseSize && !sizes.includes(baseSize)) {
+      sizes = [baseSize, ...sizes];
+    }
 
     const { prisma } = await import("@/lib/prisma"); // direct fallback import for actions
 
@@ -155,7 +190,9 @@ export async function editProductAction(id: string, formData: FormData, existing
         brand,
         isCustomOrder,
         label,
-        specifications,
+        specifications: specifications as any,
+        sizeVariants: sizeVariants as any,
+        baseSize,
       }
     });
 

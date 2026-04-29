@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createCategory, createSubcategory, updateCategory, updateSubcategory } from "./create/actions";
+import { getCloudinarySignature } from "../products/cloudinary-actions";
 import { aiTranslateAction } from "../actions/ai_actions";
 import { useToast } from "@/lib/stores/toast.store";
 import { useRouter } from "next/navigation";
@@ -117,11 +118,40 @@ export default function CategoryForm({
         }
     };
 
+    const uploadToCloudinary = async (file: File) => {
+        try {
+            const { timestamp, signature, cloudName, apiKey, folder } = await getCloudinarySignature();
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("api_key", apiKey!);
+            formData.append("timestamp", timestamp.toString());
+            formData.append("signature", signature);
+            formData.append("folder", folder);
+
+            const response = await fetch(
+                `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
+            return data.secure_url;
+        } catch (error) {
+            console.error("Cloudinary Upload Error:", error);
+            throw error;
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
 
-        const formData = new FormData(e.currentTarget);
+        const form = e.currentTarget;
+        const formData = new FormData(form);
         formData.set("name", names.en);
         formData.set("name_uk", names.uk);
         formData.set("name_ru", names.ru);
@@ -131,7 +161,21 @@ export default function CategoryForm({
             formData.set("categoryId", selectedCategoryId);
         }
 
+        // Get the file from the input
+        const fileInput = form.querySelector('input[name="image"]') as HTMLInputElement;
+        const file = fileInput?.files?.[0];
+
+        // Remove the original file from formData to avoid sending it to the server
+        formData.delete("image");
+
         try {
+            // Upload image on the client side
+            if (file) {
+                showToast("UPLOADING_ASSET_TO_CLOUD...", "warning");
+                const imageUrl = await uploadToCloudinary(file);
+                formData.set("imageUrl", imageUrl);
+            }
+
             let result;
             if (isEdit) {
                 if (activeTab === "category") {
@@ -159,9 +203,9 @@ export default function CategoryForm({
             } else {
                 showToast("ERROR_CODE: " + result.error, "error");
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            showToast("SYSTEM_CRITICAL_FAILURE", "error");
+            showToast(err.message || "SYSTEM_CRITICAL_FAILURE", "error");
         } finally {
             setLoading(false);
         }

@@ -7,17 +7,40 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export function ProductActions({
     product,
-    sizes = []
+    sizes = [],
+    sizeVariants = [],
+    selectedSize,
+    onSizeSelect
 }: {
     product: { id: string; name: string; price: number; image?: string; slug: string; stock: number; isCustomOrder: boolean; label?: any };
     sizes?: string[];
+    sizeVariants?: { size: string, price: string, salePrice?: string, stock?: string }[];
+    selectedSize?: string | null;
+    onSizeSelect?: (size: string | null) => void;
 }) {
     const { t } = useLanguage();
     const safeSizes = sizes || [];
-    const [selectedSize, setSelectedSize] = useState<string | null>(safeSizes.length === 1 ? safeSizes[0] : null);
+    const [internalSelectedSize, setInternalSelectedSize] = useState<string | null>(safeSizes.length === 1 ? safeSizes[0] : null);
+    
+    const activeSize = selectedSize !== undefined ? selectedSize : internalSelectedSize;
+    const setActiveSize = onSizeSelect || setInternalSelectedSize;
+
+    const [currentPrice, setCurrentPrice] = useState<number>(product.price);
     const [mounted, setMounted] = useState(false);
     const [isAdded, setIsAdded] = useState(false);
     const [sizeError, setSizeError] = useState(false);
+
+    useEffect(() => {
+        if (activeSize && sizeVariants.length > 0) {
+            const variant = sizeVariants.find(v => v.size === activeSize);
+            if (variant) {
+                const vPrice = variant.salePrice ? parseFloat(variant.salePrice) : parseFloat(variant.price);
+                setCurrentPrice(vPrice);
+            }
+        } else {
+            setCurrentPrice(product.price);
+        }
+    }, [activeSize, sizeVariants, product.price]);
 
     useEffect(() => {
         setMounted(true);
@@ -29,18 +52,18 @@ export function ProductActions({
     const isWishlisted = useWishlistStore((state) => state.isWishlisted(product.id));
 
     const handleAddToCart = () => {
-        if (safeSizes.length > 0 && !selectedSize) {
+        if (safeSizes.length > 0 && !activeSize) {
             setSizeError(true);
             setTimeout(() => setSizeError(false), 2500);
             return;
         }
 
         addToCart({
-            id: selectedSize ? `${product.id}-${selectedSize}` : product.id,
+            id: activeSize ? `${product.id}-${activeSize}` : product.id,
             baseId: product.id,
-            size: selectedSize || undefined,
-            title: selectedSize ? `${product.name} / ${selectedSize}` : product.name,
-            price: product.price,
+            size: activeSize || undefined,
+            title: activeSize ? `${product.name} / ${activeSize}` : product.name,
+            price: currentPrice,
             image: product.image,
         });
 
@@ -77,20 +100,25 @@ export function ProductActions({
                         </button>
                     </div>
                     <div className={`flex flex-wrap gap-2 transition-all duration-300 ${sizeError ? "outline outline-1 outline-red-400 p-2" : ""}`}>
-                        {safeSizes.map((size) => (
-                            <button
-                                key={size}
-                                onClick={() => { setSelectedSize(size); setSizeError(false); }}
-                                className={`w-11 h-11 flex items-center justify-center text-[10px] font-bold tracking-widest transition-all duration-300 ${selectedSize === size
-                                    ? "bg-black text-white"
-                                    : sizeError
-                                        ? "bg-white text-black border border-red-300 hover:border-red-500"
-                                        : "bg-white text-black border border-black/10 hover:border-black"
-                                    }`}
-                            >
-                                {size}
-                            </button>
-                        ))}
+                        {safeSizes.map((size) => {
+                            const variant = sizeVariants.find(v => v.size === size);
+                            const variantPrice = variant ? (variant.salePrice ? parseFloat(variant.salePrice) : parseFloat(variant.price)) : null;
+                            
+                            return (
+                                <button
+                                    key={size}
+                                    onClick={() => { setActiveSize(size); setSizeError(false); }}
+                                    className={`relative min-w-[3rem] h-11 px-3 flex flex-col items-center justify-center transition-all duration-300 ${activeSize === size
+                                        ? "bg-black text-white"
+                                        : sizeError
+                                            ? "bg-white text-black border border-red-300 hover:border-red-500"
+                                            : "bg-white text-black border border-black/10 hover:border-black"
+                                        }`}
+                                >
+                                    <span className="text-[10px] font-black uppercase tracking-widest">{size}</span>
+                                </button>
+                            );
+                        })}
                     </div>
 
                     {/* Inline toast */}

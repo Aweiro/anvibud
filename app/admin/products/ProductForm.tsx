@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { submitProduct, editProductAction } from "./create/actions";
+import { getCloudinarySignature } from "./cloudinary-actions";
 import { useRouter } from "next/navigation";
 import { aiTranslateAction, aiGenerateDescriptionAction } from "../actions/ai_actions";
 import { useToast } from "@/lib/stores/toast.store";
@@ -57,6 +58,27 @@ export default function ProductForm({
     const [selectedLabel, setSelectedLabel] = useState<string>(product?.label || "");
     const [brandQuery, setBrandQuery] = useState(product?.brand || "");
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+
+    // Size Variants State
+    const [sizeVariants, setSizeVariants] = useState<{ size: string, price: string, salePrice?: string, stock?: string }[]>(
+        product?.sizeVariants && Array.isArray(product.sizeVariants)
+            ? product.sizeVariants
+            : []
+    );
+
+    const handleAddSizeVariant = () => {
+        setSizeVariants([...sizeVariants, { size: "", price: "", salePrice: "", stock: "" }]);
+    };
+
+    const handleRemoveSizeVariant = (index: number) => {
+        setSizeVariants(sizeVariants.filter((_, i) => i !== index));
+    };
+
+    const handleSizeVariantChange = (index: number, field: "size" | "price" | "salePrice" | "stock", value: string) => {
+        const newVariants = [...sizeVariants];
+        (newVariants[index] as any)[field] = value;
+        setSizeVariants(newVariants);
+    };
 
     // Specifications State
     const [specifications, setSpecifications] = useState<{ key: string, value: string }[]>(
@@ -194,11 +216,40 @@ export default function ProductForm({
         }
     };
 
+    const uploadToCloudinary = async (file: File) => {
+        try {
+            const { timestamp, signature, cloudName, apiKey, folder } = await getCloudinarySignature();
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("api_key", apiKey!);
+            formData.append("timestamp", timestamp.toString());
+            formData.append("signature", signature);
+            formData.append("folder", folder);
+
+            const response = await fetch(
+                `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+                {
+                    method: "POST",
+                    body: formData,
+                }
+            );
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error.message);
+            return data.secure_url;
+        } catch (error) {
+            console.error("Cloudinary Upload Error:", error);
+            throw error;
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
 
-        const formData = new FormData(e.currentTarget);
+        const form = e.currentTarget;
+        const formData = new FormData(form);
         formData.set("name", names.en);
         formData.set("name_uk", names.uk);
         formData.set("name_ru", names.ru);
@@ -213,10 +264,25 @@ export default function ProductForm({
         formData.set("label", selectedLabel);
         formData.set("brand", brandQuery);
         formData.set("specifications", JSON.stringify(specifications.filter(s => s.key.trim() !== "" && s.value.trim() !== "")));
+        formData.set("sizeVariants", JSON.stringify(sizeVariants.filter(v => v.size.trim() !== "" && v.price.trim() !== "")));
 
-        newImages.forEach((img) => formData.append("images", img));
+        // Remove the original images from formData to avoid sending them to the server
+        formData.delete("images");
 
         try {
+            // Upload images on the client side
+            const uploadedUrls = [];
+            if (newImages.length > 0) {
+                showToast("UPLOADING_ASSETS_TO_CLOUD...", "warning");
+                for (const img of newImages) {
+                    const url = await uploadToCloudinary(img);
+                    uploadedUrls.push(url);
+                }
+            }
+
+            // Append pre-uploaded URLs to formData
+            uploadedUrls.forEach(url => formData.append("imageUrls", url));
+
             const result = isEdit
                 ? await editProductAction(product.id, formData, existingImages)
                 : await submitProduct(formData);
@@ -233,6 +299,8 @@ export default function ProductForm({
                     setSelectedSubcategoryId("");
                     setSelectedLabel("");
                     setBrandQuery("");
+                    setSizeVariants([]);
+                    setSpecifications([]);
                 } else {
                     router.push("/admin/products");
                     router.refresh();
@@ -240,9 +308,9 @@ export default function ProductForm({
             } else {
                 showToast("ERROR_CODE: " + result.error, "error");
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            showToast("UNEXPECTED_SYSTEM_FAILURE", "error");
+            showToast(err.message || "UNEXPECTED_SYSTEM_FAILURE", "error");
         } finally {
             setLoading(false);
         }
@@ -518,7 +586,17 @@ export default function ProductForm({
                             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-black/30 dark:text-white/30">04 // Economic Metrics</span>
                             <div className="space-y-4">
                                 <label className="block text-[10px] uppercase font-black tracking-widest text-black dark:text-white">Pricing Structure</label>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border border-black/10 dark:border-white/10 bg-black/[0.01] dark:bg-white/[0.01]">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6 border border-black/10 dark:border-white/10 bg-black/[0.01] dark:bg-white/[0.01]">
+                                    <div>
+                                        <label className="block text-[8px] uppercase font-bold mb-2 text-black/40 dark:text-white/40">Base Size / Weight</label>
+                                        <input
+                                            type="text"
+                                            name="baseSize"
+                                            defaultValue={(product as any)?.baseSize || ""}
+                                            placeholder="e.g. 50mm"
+                                            className="w-full bg-white dark:bg-zinc-900 border border-black/20 dark:border-white/20 px-4 py-4 rounded-none text-xs text-black dark:text-white font-bold outline-none focus:border-black dark:focus:border-white transition-all"
+                                        />
+                                    </div>
                                     <div>
                                         <label className="block text-[8px] uppercase font-bold mb-2 text-black/40 dark:text-white/40">Base Price (Original $)</label>
                                         <input
@@ -557,18 +635,81 @@ export default function ProductForm({
                             </div>
                         </div>
 
-                        {/* Dimensions */}
+                        {/* Dimensions & Pricing Variants */}
                         <div className="space-y-6">
-                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-black/30 dark:text-white/30">05 // Physical Dimension Matrix</span>
-                            <div>
-                                <label className="block text-[10px] uppercase font-black tracking-widest mb-4 text-black dark:text-white">Sizes (Input as CSV)</label>
-                                <input
-                                    type="text"
-                                    name="sizes"
-                                    defaultValue={product?.sizes?.join(", ") || ""}
-                                    placeholder="XS, S, M, L, XL, OS"
-                                    className="w-full bg-white dark:bg-zinc-900 border border-black/20 dark:border-white/20 px-4 py-4 rounded-none text-xs text-black dark:text-white font-bold uppercase tracking-widest outline-none focus:border-black dark:focus:border-white transition-all"
-                                />
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-black/30 dark:text-white/30">05 // Dimensional Pricing Matrix</span>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <label className="block text-[10px] uppercase font-black tracking-widest text-black dark:text-white">Price per Size</label>
+                                    <button
+                                        type="button"
+                                        onClick={handleAddSizeVariant}
+                                        className="text-[9px] font-black uppercase tracking-[0.2em] border-b border-black/20 hover:border-black transition-all"
+                                    >
+                                        [+] Add Variant
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    {sizeVariants.map((variant, index) => (
+                                        <div key={index} className="flex flex-col gap-3 p-4 border border-black/5 dark:border-white/5 bg-black/[0.01] dark:bg-white/[0.01]">
+                                            <div className="flex gap-2 items-center">
+                                                <input
+                                                    type="text"
+                                                    value={variant.size}
+                                                    onChange={(e) => handleSizeVariantChange(index, "size", e.target.value)}
+                                                    placeholder="Розмір / Вага (напр. 100мм або 22кг/м3)"
+                                                    className="flex-1 bg-white dark:bg-zinc-900 border border-black/20 dark:border-white/20 px-3 py-3 rounded-none text-xs text-black dark:text-white font-bold outline-none focus:border-black dark:focus:border-white transition-all"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveSizeVariant(index)}
+                                                    className="w-10 h-10 flex items-center justify-center bg-red-500 text-white font-black hover:bg-red-600 transition-colors"
+                                                >
+                                                    X
+                                                </button>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <div className="space-y-1">
+                                                    <label className="text-[8px] uppercase font-black text-black/40 dark:text-white/40">Regular_Price</label>
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        value={variant.price}
+                                                        onChange={(e) => handleSizeVariantChange(index, "price", e.target.value)}
+                                                        placeholder="₴"
+                                                        className="w-full bg-white dark:bg-zinc-900 border border-black/20 dark:border-white/20 px-3 py-2 rounded-none text-xs text-black dark:text-white font-bold outline-none"
+                                                    />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[8px] uppercase font-black text-black/40 dark:text-white/40">Sale_Price</label>
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        value={variant.salePrice || ""}
+                                                        onChange={(e) => handleSizeVariantChange(index, "salePrice", e.target.value)}
+                                                        placeholder="₴"
+                                                        className="w-full bg-white dark:bg-zinc-900 border border-black/20 dark:border-white/20 px-3 py-2 rounded-none text-xs text-black dark:text-white font-bold outline-none"
+                                                    />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[8px] uppercase font-black text-black/40 dark:text-white/40">Stock_Qty</label>
+                                                    <input
+                                                        type="number"
+                                                        value={variant.stock || ""}
+                                                        onChange={(e) => handleSizeVariantChange(index, "stock", e.target.value)}
+                                                        placeholder="QTY"
+                                                        className="w-full bg-white dark:bg-zinc-900 border border-black/20 dark:border-white/20 px-3 py-2 rounded-none text-xs text-black dark:text-white font-bold outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {sizeVariants.length === 0 && (
+                                        <div className="text-center py-6 border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] text-[10px] uppercase tracking-widest text-black/40">
+                                            No size variants defined. Default price will be used.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 

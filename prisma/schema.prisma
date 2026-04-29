@@ -77,6 +77,8 @@ model Product {
   brand             String?
   label             ProductLabel?
   specifications    Json?
+  sizeVariants      Json?         // Array of { size: string, price: number, salePrice: number, stock: number }
+  baseSize          String?
   subcategoryId     String
   subcategory       Subcategory   @relation(fields: [subcategoryId], references: [id], onDelete: Restrict)
   orderItems        OrderItem[]

@@ -12,8 +12,8 @@ export async function createCategory(formData: FormData) {
 
         if (!name || !slug) throw new Error("Name and Slug are required.");
 
-        let imageUrl = null;
-        if (imageFile && imageFile.size > 0) {
+        let imageUrl = formData.get("imageUrl") as string | null;
+        if (!imageUrl && imageFile && imageFile.size > 0 && typeof imageFile !== "string") {
             imageUrl = await uploadImage(imageFile);
         }
 
@@ -49,8 +49,8 @@ export async function createSubcategory(formData: FormData) {
             throw new Error("Name, Slug, and Category are required.");
         }
 
-        let imageUrl = null;
-        if (imageFile && imageFile.size > 0) {
+        let imageUrl = formData.get("imageUrl") as string | null;
+        if (!imageUrl && imageFile && imageFile.size > 0 && typeof imageFile !== "string") {
             imageUrl = await uploadImage(imageFile);
         }
 
@@ -91,8 +91,11 @@ export async function updateCategory(id: string, formData: FormData) {
             slug
         };
 
-        if (imageFile && imageFile.size > 0) {
-            const imageUrl = await uploadImage(imageFile);
+        let imageUrl = formData.get("imageUrl") as string | null;
+        if (!imageUrl && imageFile && imageFile.size > 0 && typeof imageFile !== "string") {
+            imageUrl = await uploadImage(imageFile);
+        }
+        if (imageUrl) {
             dataToUpdate.image = imageUrl;
         }
 
@@ -133,8 +136,11 @@ export async function updateSubcategory(id: string, formData: FormData) {
             category: { connect: { id: categoryId } },
         };
 
-        if (imageFile && imageFile.size > 0) {
-            const imageUrl = await uploadImage(imageFile);
+        let imageUrl = formData.get("imageUrl") as string | null;
+        if (!imageUrl && imageFile && imageFile.size > 0 && typeof imageFile !== "string") {
+            imageUrl = await uploadImage(imageFile);
+        }
+        if (imageUrl) {
             dataToUpdate.image = imageUrl;
         }
 

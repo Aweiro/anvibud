@@ -24,6 +24,8 @@ type ProductCardProps = {
   sizes?: string[];
   label?: 'BESTSELLER' | 'NEW' | 'SALE' | null;
   specifications?: any;
+  sizeVariants?: { size: string, price: string, salePrice?: string }[];
+  baseSize?: string;
 };
 
 const formatPrice = (price: number, currency: string) =>
@@ -47,6 +49,8 @@ export function ProductCard({
   sizes = [],
   label,
   specifications,
+  sizeVariants = [],
+  baseSize,
 }: ProductCardProps) {
   const { t } = useLanguage();
   const [isAdded, setIsAdded] = useState(false);
@@ -72,11 +76,32 @@ export function ProductCard({
   const removeFromWishlist = useWishlistStore((state) => state.removeFromWishlist);
   const isWishlisted = useWishlistStore((state) => state.isWishlisted(id));
 
-  const hasDiscount = discountAmount > 0;
-  const originalPrice = price;
-  const finalPrice = Math.max(0, price - discountAmount);
-  // Calculate percentage dynamically for display
-  const discountPercent = hasDiscount ? Math.round((discountAmount / price) * 100) : 0;
+  const [cardPrice, setCardPrice] = useState<number>(price);
+  const [cardSalePrice, setCardSalePrice] = useState<number | null>(discountAmount > 0 ? price - discountAmount : null);
+
+  useEffect(() => {
+    let matched = false;
+    if (selectedSize && sizeVariants.length > 0) {
+      const variant = sizeVariants.find(v => v.size === selectedSize);
+      if (variant) {
+        const vPrice = parseFloat(variant.price);
+        const vSalePrice = variant.salePrice ? parseFloat(variant.salePrice) : null;
+        setCardPrice(vPrice);
+        setCardSalePrice(vSalePrice);
+        matched = true;
+      }
+    }
+
+    if (!matched) {
+      setCardPrice(price);
+      setCardSalePrice(discountAmount > 0 ? price - discountAmount : null);
+    }
+  }, [selectedSize, sizeVariants, price, discountAmount]);
+
+  const finalPrice = cardSalePrice !== null ? cardSalePrice : cardPrice;
+  const originalPrice = cardSalePrice !== null ? cardPrice : price;
+  const hasDiscount = cardSalePrice !== null && cardSalePrice < cardPrice;
+  const discountPercent = hasDiscount ? Math.round(((cardPrice - cardSalePrice) / cardPrice) * 100) : 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();

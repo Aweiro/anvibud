@@ -1,8 +1,9 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ProductGallery } from "@/components/ProductGallery";
-import { ProductActions } from "@/components/ProductActions";
+import { ProductInfoClient } from "@/components/ProductInfoClient";
 import { ProductSlider } from "@/components/ProductSlider";
 import { Footer } from "@/components/Footer";
 import { getServerTranslation } from "@/lib/i18n/server";
@@ -116,43 +117,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <div className="w-full lg:w-[45%] xl:w-[40%] flex flex-col justify-start">
                         <div className="sticky top-28 space-y-10">
 
-                            {/* Title & Price */}
-                            <div className="space-y-4 text-black">
-                                <h1 className="text-4xl lg:text-5xl font-black uppercase tracking-tighter leading-[0.9] text-black">
-                                    {prodName}
-                                </h1>
-
-                                <div className="flex items-baseline gap-4 text-black">
-                                    <span className="text-2xl font-bold tracking-widest text-black">
-                                        ${discountedPrice.toFixed(2)}
-                                    </span>
-                                    {hasDiscount && (
-                                        <>
-                                            <span className="text-sm text-black/30 line-through tracking-widest">
-                                                ${price.toFixed(2)}
-                                            </span>
-                                            <span className="text-[10px] uppercase tracking-widest font-bold text-red-500">
-                                                {discountPercent}% {t('product.off')}
-                                            </span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Client Actions: Size, Availability, Add to Cart */}
-                            <ProductActions
-                                product={{
-                                    id: product.id,
-                                    name: prodName,
-                                    price: discountedPrice,
-                                    image: product.images?.[0],
-                                    slug: product.slug,
-                                    stock: product.stock,
-                                    isCustomOrder: product.isCustomOrder,
-                                    label: (product as any).label,
-                                }}
-                                sizes={product.sizes}
-                            />
+                            <Suspense fallback={<div className="h-96 animate-pulse bg-black/5 dark:bg-white/5" />}>
+                                <ProductInfoClient
+                                    product={{
+                                        ...product,
+                                        price: price,
+                                        discountAmount: discountAmount,
+                                        sizes: product.sizes,
+                                        sizeVariants: product.sizeVariants as any,
+                                        baseSize: (product as any).baseSize
+                                    }}
+                                    prodName={prodName}
+                                />
+                            </Suspense>
                         </div>
                     </div>
                 </div>

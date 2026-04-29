@@ -111,6 +111,8 @@ export function ProductSlider({ products, lang }: ProductSliderProps) {
                             sizes={product.sizes}
                             label={product.label as any}
                             specifications={product.specifications}
+                            sizeVariants={product.sizeVariants}
+                            baseSize={product.baseSize}
                         />
                     </div>
                 ))}
