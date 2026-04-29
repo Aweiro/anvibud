@@ -28,7 +28,7 @@ function WishlistItem({ item, onRemove }: WishlistItemProps) {
     useEffect(() => {
         let matched = false;
         if (selectedSize && item.sizeVariants && item.sizeVariants.length > 0) {
-            const variant = item.sizeVariants.find(v => v.size === selectedSize);
+            const variant = item.sizeVariants.find((v: any) => v.size === selectedSize);
             if (variant) {
                 const vPrice = parseFloat(variant.price);
                 const vSalePrice = variant.salePrice ? parseFloat(variant.salePrice) : null;
