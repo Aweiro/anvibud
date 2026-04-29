@@ -7,6 +7,21 @@ import { FilterBar } from "./FilterBar";
 import { getServerTranslation } from "@/lib/i18n/server";
 import { InfiniteProductGrid } from "./InfiniteProductGrid";
 import { ProductSlider } from "./ProductSlider";
+import { HeroCarousel } from "./HeroCarousel";
+import { 
+    Hammer, 
+    Paintbrush, 
+    Home, 
+    Zap, 
+    Droplets, 
+    Shovel, 
+    Construction, 
+    Wrench,
+    ArrowRight,
+    ChevronRight
+} from "lucide-react";
+import { CategoryGrid } from "./CategoryGrid";
+import { SubcategoryGrid } from "./SubcategoryGrid";
 
 interface Product {
     id: string;
@@ -63,6 +78,17 @@ export async function Storefront({
     const selectedSizes = typeof searchParams?.size === 'string' ? searchParams.size.split(',') : [];
     const selectedBrands = typeof searchParams?.brand === 'string' ? searchParams.brand.split(',') : [];
     const selectedLabels = typeof searchParams?.label === 'string' ? searchParams.label.split(',') : [];
+    const searchQuery = typeof searchParams?.search === 'string' ? searchParams.search : undefined;
+
+    if (searchQuery) {
+        whereClause.OR = [
+            { name: { contains: searchQuery, mode: 'insensitive' } },
+            { name_uk: { contains: searchQuery, mode: 'insensitive' } },
+            { name_ru: { contains: searchQuery, mode: 'insensitive' } },
+            { name_pl: { contains: searchQuery, mode: 'insensitive' } },
+            { brand: { contains: searchQuery, mode: 'insensitive' } },
+        ];
+    }
 
     if (selectedSizes.length > 0) {
         whereClause.sizes = {
@@ -168,121 +194,139 @@ export async function Storefront({
         })
         : [];
 
-    const tickerLogos = ["/brand1.png", "/brand2.png", "/brand3.png", "/brand4.png", "/brand5.png", "/brand6.png"];
+    const subcategories = categorySlug 
+        ? await prisma.subcategory.findMany({
+            where: { category: { slug: categorySlug } },
+            orderBy: { name: 'asc' }
+        })
+        : [];
+
+    const tickerLogos = [
+        "/brand1.png",
+        "/brand2.png",
+        "/brand3.png",
+        "/brand4.png",
+        "/brand5.png",
+        "/brand6.png"
+    ];
 
     return (
         <main className="flex-1 bg-white">
 
-            {/* Quality-Focused Split Hero (More compact) */}
-            {!hideHero && (
+            {/* Hero Section with Sidebar */}
+            {!hideHero && !categorySlug && !subcategorySlug && (
+                <div className="mx-auto max-w-[1800px] px-0 lg:px-6 lg:mt-4">
+                    <div className="flex flex-col lg:flex-row gap-0 lg:gap-6 h-auto lg:h-[600px]">
+                        
+                        {/* Desktop Sidebar */}
+                        <aside className="hidden lg:flex flex-col w-[320px] bg-white border border-black/5 rounded-sm overflow-hidden shadow-sm">
+                            <div className="p-4 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-between">
+                                <span>Категорії товарів</span>
+                                <ArrowRight size={14} />
+                            </div>
+                            <nav className="flex-1 overflow-y-auto py-2">
+                                {categories.map((cat, idx) => {
+                                    // Map icons to categories (simplified logic)
+                                    const Icon = [Hammer, Droplets, Paintbrush, Zap, Home, Construction, Shovel, Wrench][idx % 8];
+                                    return (
+                                        <Link 
+                                            key={cat.id} 
+                                            href={`/${cat.slug}`}
+                                            className="group flex items-center justify-between px-4 py-3 hover:bg-zinc-50 transition-colors border-b border-black/[0.02] last:border-0"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 flex items-center justify-center bg-zinc-50 group-hover:bg-black group-hover:text-white transition-colors duration-200 rounded-sm">
+                                                    <Icon size={16} strokeWidth={1.5} />
+                                                </div>
+                                                <span className="text-[11px] font-bold uppercase tracking-wider text-black/70 group-hover:text-black transition-colors duration-200">
+                                                    {cat.name_uk || cat.name}
+                                                </span>
+                                            </div>
+                                            <ChevronRight size={12} className="text-black/10 group-hover:text-black/40 transition-transform duration-200 transform group-hover:translate-x-1" />
+                                        </Link>
+                                    );
+                                })}
+                            </nav>
+                            <div className="p-4 border-t border-black/5 bg-zinc-50/50">
+                                <Link href="/shop" className="text-[9px] font-black uppercase tracking-[0.3em] text-black/40 hover:text-black transition-colors flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-black rounded-full animate-pulse" />
+                                    Переглянути всі
+                                </Link>
+                            </div>
+                        </aside>
+
+                        {/* Carousel Area */}
+                        <div className="flex-1 min-w-0 h-[400px] md:h-[500px] lg:h-full">
+                            <HeroCarousel />
+                        </div>
+
+                    </div>
+                </div>
+            )}
+
+            {/* Category/Subcategory Static Hero (Existing logic for deep pages) */}
+            {!hideHero && (categorySlug || subcategorySlug) && (
                 <div className="relative w-full overflow-hidden bg-[#f0f0f0] border-b border-black/[0.03]">
-                    {!categorySlug && !subcategorySlug ? (
-                        <div className="mx-auto max-w-[1800px] flex flex-col md:flex-row items-center relative">
-                            {/* Decorative Info (Top Left) */}
-                            <div className="absolute top-10 left-6 hidden xl:block">
-                                <div className="flex items-center gap-4 text-[9px] uppercase tracking-[0.4em] font-bold text-black/20">
-                                    <span>{t('home.ref_code')}</span>
-                                    <span className="w-8 h-[1px] bg-black/10"></span>
-                                    <span>{t('home.contextual_library')}</span>
+                    <div className="mx-auto max-w-[1800px] flex flex-col md:flex-row items-stretch relative h-[200px] md:h-[200px] overflow-hidden group">
+                        {/* Background Image / Desktop Panel */}
+                        <div className="absolute inset-0 md:relative md:flex-1 bg-zinc-100 overflow-hidden">
+                            {(subcategoryData?.image || subcategoryData?.category?.image || categoryData?.image) ? (
+                                <Image
+                                    src={subcategoryData?.image || subcategoryData?.category?.image || categoryData?.image || ""}
+                                    alt={currentTitle}
+                                    fill
+                                    className="object-cover transition-all duration-[2000ms] group-hover:scale-105 grayscale contrast-125 brightness-90 opacity-80 group-hover:opacity-100 group-hover:brightness-100"
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-[10px] uppercase tracking-widest text-black/10 font-bold italic bg-zinc-50">
+                                    {t('home.visual_archive')}
                                 </div>
+                            )}
+                            {/* Mobile Dark Gradient Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent md:hidden" />
+                        </div>
+
+                        {/* Text Content */}
+                        <div className="flex-1 md:flex-1 bg-transparent md:bg-white flex flex-col justify-end md:justify-center px-6 pb-4 md:px-20 border-l border-black/[0.03] overflow-hidden">
+                            {/* Abstract background text - hidden on mobile */}
+                            <div className="absolute -right-4 top-1/2 -translate-y-1/2 text-[12vw] font-black text-black/[0.02] uppercase tracking-tighter leading-none select-none pointer-events-none italic hidden md:block">
+                                {currentTitle}
                             </div>
 
-                            {/* Text Content */}
-                            <div className="flex-1 px-6 py-12 md:py-24 z-10">
-                                <div className="max-w-2xl relative">
-                                    <div className="inline-flex items-center px-2 py-1 bg-black text-white text-[8px] uppercase tracking-[0.3em] font-bold mb-4 md:mb-8 animate-pulse">
-                                        {t('home.new_arrival_badge')}
-                                    </div>
-
-                                    <h1 className="text-6xl md:text-[7vw] font-black text-black tracking-tighter leading-[0.8] mb-6 md:mb-10 uppercase italic">
-                                        {t('home.hero_title_1')} <br /><span className="text-black/10 transition-colors duration-1000">{t('home.hero_title_2')}</span>
+                            <div className="relative z-10 space-y-6 pt-10 md:pt-0">
+                                <nav className="flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-black text-white/50 md:text-black/20 md:pt-2 md:border-t md:border-black/5">
+                                    <Link href="/" className="hover:text-white md:hover:text-black transition-colors">{t('common.archive')}</Link>
+                                    <span>/</span>
+                                    <span className="text-white md:text-black">{currentBreadcrumb}</span>
+                                </nav>
+                                <div className="space-y-2">
+                                    <h1 className="text-4xl md:text-[4vw] mb-4 font-black text-white md:text-black tracking-tighter uppercase italic leading-[0.8]">
+                                        {currentTitle}
                                     </h1>
 
-                                    <p className="text-xs md:text-lg text-black/60 max-w-sm mb-8 md:mb-12 uppercase tracking-[0.2em] leading-relaxed font-light">
-                                        {t('home.hero_desc')}
-                                    </p>
-
-                                    <div className="flex flex-wrap gap-4 md:gap-6 items-center">
-                                        <Link href="/shop" className="px-10 py-4 md:px-12 md:py-5 bg-black text-white text-[10px] md:text-[11px] uppercase font-bold tracking-[0.3em] hover:bg-black/90 transform hover:-translate-y-1 transition-all duration-300 shadow-xl shadow-black/10 text-center">
-                                            {t('common.shop_library')}
-                                        </Link>
-                                        <button className="text-black text-[10px] md:text-[11px] uppercase font-bold tracking-[0.4em] border-b-2 border-black pb-1 hover:text-black/50 transition-colors">
-                                            {t('common.view_archives')}
-                                        </button>
+                                    <div className="flex items-center gap-4">
+                                        <span className="text-[10px] uppercase tracking-[0.4em] font-black text-white/40 md:text-black/40">{totalProducts} {t('common.objects')}</span>
+                                        <div className="w-8 h-[1px] bg-white/20 md:bg-black/10" />
+                                        <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/20 md:text-black/10 italic">{t('home.contextual_library')} 26</span>
                                     </div>
-                                </div>
-                            </div>
-
-                            {/* Image Content (Full height of the smaller panel) */}
-                            <div className="flex-1 w-full h-[400px] md:h-[650px] relative bg-white">
-                                <Image
-                                    src="/hero_sharp.png"
-                                    alt="MIGRA Contextual"
-                                    fill
-                                    priority
-                                    quality={100}
-                                    className="object-cover hover:scale-[1.05] transition-transform duration-[2000ms] ease-out"
-                                />
-                                {/* Texture Overlay */}
-                                <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grain-y.com/images/grain.png')] mix-blend-overlay" />
-
-                                {/* Floating Metadata Card */}
-                                <div className="absolute bottom-12 right-12 bg-white/40 backdrop-blur-xl border border-white/40 p-6 hidden lg:block">
-                                    <div className="text-[9px] uppercase tracking-[0.3em] font-bold text-black mb-1">{t('home.look_no')}</div>
-                                    <div className="text-[10px] text-black/60 italic">{t('home.the_essential_uniform')}</div>
                                 </div>
                             </div>
                         </div>
-                    ) : (
-                        <div className="mx-auto max-w-[1800px] flex flex-col md:flex-row items-stretch relative h-[200px] md:h-[200px] overflow-hidden group">
-                            {/* Background Image / Desktop Panel */}
-                            <div className="absolute inset-0 md:relative md:flex-1 bg-zinc-100 overflow-hidden">
-                                {(subcategoryData?.category?.image || categoryData?.image) ? (
-                                    <Image
-                                        src={subcategoryData?.category?.image || categoryData?.image || ""}
-                                        alt={currentTitle}
-                                        fill
-                                        className="object-cover transition-all duration-[2000ms] group-hover:scale-105 grayscale contrast-125 brightness-90 opacity-80 group-hover:opacity-100 group-hover:brightness-100"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-[10px] uppercase tracking-widest text-black/10 font-bold italic bg-zinc-50">
-                                        {t('home.visual_archive')}
-                                    </div>
-                                )}
-                                {/* Mobile Dark Gradient Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent md:hidden" />
-                            </div>
+                    </div>
+                </div>
+            )}
 
-                            {/* Text Content */}
-                            <div className="flex-1 md:flex-1 bg-transparent md:bg-white flex flex-col justify-end md:justify-center px-6 pb-4 md:px-20 border-l border-black/[0.03] overflow-hidden">
-                                {/* Abstract background text - hidden on mobile */}
-                                <div className="absolute -right-4 top-1/2 -translate-y-1/2 text-[12vw] font-black text-black/[0.02] uppercase tracking-tighter leading-none select-none pointer-events-none italic hidden md:block">
-                                    {currentTitle}
-                                </div>
-
-                                <div className="relative z-10 space-y-6 pt-10 md:pt-0">
-                                    <nav className="flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-black text-white/50 md:text-black/20 md:pt-2 md:border-t md:border-black/5">
-                                        <Link href="/" className="hover:text-white md:hover:text-black transition-colors">{t('common.archive')}</Link>
-                                        <span>/</span>
-                                        <span className="text-white md:text-black">{currentBreadcrumb}</span>
-                                    </nav>
-                                    <div className="space-y-2">
-                                        <h1 className="text-4xl md:text-[4vw] mb-4 font-black text-white md:text-black tracking-tighter uppercase italic leading-[0.8]">
-                                            {currentTitle}
-                                        </h1>
-
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-[10px] uppercase tracking-[0.4em] font-black text-white/40 md:text-black/40">{totalProducts} {t('common.objects')}</span>
-                                            <div className="w-8 h-[1px] bg-white/20 md:bg-black/10" />
-                                            <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/20 md:text-black/10 italic">{t('home.contextual_library')} 26</span>
-                                        </div>
-                                    </div>
-
-
-                                </div>
-                            </div>
-                        </div>
-                    )}
+            {/* Subcategories Visual Navigation */}
+            {categorySlug && subcategories.length > 0 && (
+                <div className="bg-white border-b border-black/[0.03]">
+                    <div className="mx-auto max-w-[1800px] px-4 md:px-6 py-6 md:py-10">
+                        <SubcategoryGrid 
+                            categorySlug={categorySlug}
+                            subcategorySlug={subcategorySlug}
+                            subcategories={subcategories as any}
+                            lang={lang}
+                        />
+                    </div>
                 </div>
             )}
 
@@ -291,12 +335,11 @@ export async function Storefront({
                 <div className="w-full bg-white py-4 overflow-hidden">
                     <div className="animate-marquee whitespace-nowrap flex items-center gap-2 md:gap-12">
                         {[...tickerLogos, ...tickerLogos].map((logo, i) => (
-                            <div key={i} className="flex-shrink-0 h-10 md:h-18 w-24 md:w-56 relative grayscale opacity-40 hover:opacity-100 transition-opacity duration-300 transform hover:scale-110">
-                                <Image
+                            <div key={i} className="flex-shrink-0 h-10 md:h-18 w-24 md:w-56 relative grayscale opacity-40 hover:opacity-100 transition-opacity duration-300 transform hover:scale-110 flex items-center justify-center">
+                                <img
                                     src={logo}
                                     alt="Partner Brand"
-                                    fill
-                                    className="object-contain"
+                                    className="max-h-full max-w-full object-contain"
                                 />
                             </div>
                         ))}
@@ -313,30 +356,13 @@ export async function Storefront({
                         </h3>
                         <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-black/40">Index / 01-0{categories.length}</span>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {categories.map((cat: Category) => (
-                            <Link
-                                key={cat.id}
-                                href={`/${cat.slug}`}
-                                className="group relative aspect-[16/10] bg-[#f9f9f9] overflow-hidden"
-                            >
-                                {cat.image && (
-                                    <img
-                                        src={cat.image}
-                                        alt={cat.name}
-                                        className="absolute inset-0 w-full h-full object-cover grayscale-0 group-hover:grayscale opacity-100 transition-all duration-700 group-hover:scale-105"
-                                    />
-                                )}
-                                <div className="absolute inset-0 bg-transparent group-hover:bg-black/20 transition-colors duration-500" />
-                                <div className="absolute inset-0 p-10 flex flex-col justify-between">
-                                    <span className="text-[10px] text-white/60 font-medium tracking-[0.3em] uppercase opacity-0 group-hover:opacity-100 transition-opacity">{t('common.browse_store')}</span>
-                                    <h4 className="text-white text-3xl font-black uppercase tracking-widest drop-shadow-lg">
-                                        {(lang === 'en' ? cat.name : cat[`name_${lang}`] || cat.name)}
-                                    </h4>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                    <CategoryGrid 
+                        categories={categories as any} 
+                        lang={lang} 
+                        translations={{
+                            browse_store: t('common.browse_store')
+                        }} 
+                    />
                 </div>
             )}
 
@@ -416,6 +442,7 @@ export async function Storefront({
                                 categorySlug={categorySlug}
                                 subcategorySlug={subcategorySlug}
                                 sort={sort}
+                                search={searchQuery}
                                 lang={lang}
                             />
                         )}
@@ -427,7 +454,7 @@ export async function Storefront({
             {!hideHero && !categorySlug && !subcategorySlug && (
                 <div className="bg-black text-white md:py-32 py-12 overflow-hidden relative border-y border-white/5">
                     <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] select-none pointer-events-none">
-                        <span className="text-[40vw] font-black uppercase tracking-tighter leading-none italic">MIGRA</span>
+                        <span className="text-[40vw] font-black uppercase tracking-tighter leading-none italic">ANVIBUD</span>
                     </div>
 
                     <div className="mx-auto max-w-[1800px] px-6 relative z-10 text-center">

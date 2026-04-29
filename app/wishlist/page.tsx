@@ -47,7 +47,15 @@ function WishlistItem({ item, onRemove }: WishlistItemProps) {
     return (
         <div className="group flex flex-col h-full">
             <div className="relative aspect-square bg-[#f9f9f9] overflow-hidden">
-                <Link href={`/product/${item.slug}`}>
+                <div 
+                    onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (!target.closest('button')) {
+                            router.push(`/product/${item.slug}`);
+                        }
+                    }}
+                    className="relative aspect-square bg-[#f9f9f9] overflow-hidden cursor-pointer"
+                >
                     <div className="relative aspect-square bg-[#f9f9f9] overflow-hidden">
                         {item.label && (
                             <div className="absolute top-3 left-3 md:top-4 md:left-4 z-10">
@@ -94,24 +102,26 @@ function WishlistItem({ item, onRemove }: WishlistItemProps) {
 
                             {/* Arrows for Mobile */}
                             {(item.allImages?.length || [item.image, item.hoverImage].filter(Boolean).length) > 1 && (
-                                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-0 z-20">
+                                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-0 z-20 pointer-events-none">
                                     <button
-                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCurrentImgIdx(prev => (prev - 1 + (item.allImages?.length || 2)) % (item.allImages?.length || 2)); }}
-                                        className="w-7 h-7 flex items-center justify-center bg-white/25 backdrop-blur-[1px] text-black/45 active:text-black transition-all"
+                                        onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); setCurrentImgIdx(prev => (prev - 1 + (item.allImages?.length || 2)) % (item.allImages?.length || 2)); }}
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                        className="w-8 h-8 flex items-center justify-center bg-white/40 backdrop-blur-md text-black shadow-sm active:scale-90 transition-all pointer-events-auto touch-manipulation"
                                     >
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M15 18l-6-6 6-6" /></svg>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
                                     </button>
                                     <button
-                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCurrentImgIdx(prev => (prev + 1) % (item.allImages?.length || 2)); }}
-                                        className="w-7 h-7 flex items-center justify-center bg-white/25 backdrop-blur-[1px] text-black/45 active:text-black transition-all"
+                                        onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); setCurrentImgIdx(prev => (prev + 1) % (item.allImages?.length || 2)); }}
+                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                                        className="w-8 h-8 flex items-center justify-center bg-white/40 backdrop-blur-md text-black shadow-sm active:scale-90 transition-all pointer-events-auto touch-manipulation"
                                     >
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M9 18l6-6-6-6" /></svg>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
                                     </button>
                                 </div>
                             )}
                         </div>
                     </div>
-                </Link>
+                </div>
                 {/* Remove button */}
                 <button
                     onClick={() => onRemove(item.id)}
@@ -208,7 +218,7 @@ export default function WishlistPage() {
                         <span className="text-black">{t('wishlist.title')}</span>
                     </nav>
                     <div className="flex items-center gap-4">
-                        <span className="text-[10px] uppercase tracking-[0.5em] font-black text-black/20">MIGRA®</span>
+                        <span className="text-[10px] uppercase tracking-[0.5em] font-black text-black/20">ANVIBUD®</span>
                         <div className="w-12 h-[1px] bg-black/10 hidden sm:block" />
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-1 rounded-full bg-black" />

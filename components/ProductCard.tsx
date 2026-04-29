@@ -23,6 +23,7 @@ type ProductCardProps = {
   className?: string;
   sizes?: string[];
   label?: 'BESTSELLER' | 'NEW' | 'SALE' | null;
+  specifications?: any;
 };
 
 const formatPrice = (price: number, currency: string) =>
@@ -45,6 +46,7 @@ export function ProductCard({
   className = "",
   sizes = [],
   label,
+  specifications,
 }: ProductCardProps) {
   const { t } = useLanguage();
   const [isAdded, setIsAdded] = useState(false);
@@ -119,25 +121,38 @@ export function ProductCard({
     }
   };
 
-  const nextImage = (e: React.MouseEvent) => {
+  const nextImage = (e: React.MouseEvent | React.PointerEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setCurrentImgIdx((prev) => (prev + 1) % carouselImages.length);
+    if (carouselImages.length > 1) {
+      setCurrentImgIdx((prev) => (prev + 1) % carouselImages.length);
+    }
   };
 
-  const prevImage = (e: React.MouseEvent) => {
+  const prevImage = (e: React.MouseEvent | React.PointerEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setCurrentImgIdx((prev) => (prev - 1 + carouselImages.length) % carouselImages.length);
+    if (carouselImages.length > 1) {
+      setCurrentImgIdx((prev) => (prev - 1 + carouselImages.length) % carouselImages.length);
+    }
   };
 
 
   return (
     <article className={`group relative flex flex-col h-full bg-white ${className}`}>
       <div className="relative">
-        {/* 1. Image Link */}
+        {/* 1. Image Container (instead of Link for better event control) */}
         {slug ? (
-          <Link href={`/product/${slug}`} className="block relative aspect-[3/4] w-full bg-[#f9f9f9] overflow-hidden group/img">
+          <div 
+            onClick={(e) => {
+              // Only navigate if we're not clicking a button or its children
+              const target = e.target as HTMLElement;
+              if (!target.closest('button')) {
+                router.push(`/product/${slug}`);
+              }
+            }}
+            className="block relative aspect-[3/4] w-full bg-[#f9f9f9] overflow-hidden group/img cursor-pointer"
+          >
             {/* Desktop View: Smooth Hover */}
             <div className="hidden md:block absolute inset-0 p-8">
               <Image
@@ -158,7 +173,6 @@ export function ProductCard({
                 />
               )}
             </div>
-
             {/* Mobile View: Carousel */}
             <div className="md:hidden absolute inset-0">
               {carouselImages.map((img, idx) => (
@@ -177,7 +191,6 @@ export function ProductCard({
                 </div>
               ))}
             </div>
-
             {label && (
               <div className="absolute top-4 left-4 z-10 flex flex-col gap-1 items-start">
                 <span className={`text-[8px] md:text-[10px] uppercase font-black tracking-[0.2em] px-2 py-1 md:px-2.5 md:py-1.5 shadow-2xl backdrop-blur-md ${label === 'BESTSELLER' ? 'bg-black text-white' :
@@ -188,13 +201,24 @@ export function ProductCard({
                 </span>
               </div>
             )}
-
             {hasDiscount && (
               <span className="absolute bottom-4 left-4 bg-black text-white text-[10px] uppercase font-bold px-2 py-1 tracking-tighter">
                 -{discountPercent}%
               </span>
             )}
-          </Link>
+
+            {/* Hover Specifications Overlay (Desktop only) */}
+            {specifications && Array.isArray(specifications) && specifications.length > 0 && (
+              <div className="hidden lg:flex absolute inset-x-0 bottom-0 flex-col justify-end p-6 bg-gradient-to-t from-[#f9f9f9] via-[#f9f9f9]/90 to-transparent opacity-0 group-hover/img:opacity-100 transition-all duration-500 z-20 translate-y-2 group-hover/img:translate-y-0">
+                {(specifications as {key: string, value: string}[]).slice(0, 3).map((spec, idx) => (
+                  <div key={idx} className="flex justify-between items-center text-[9px] uppercase tracking-[0.1em] py-1.5 border-b border-black/5 last:border-0">
+                    <span className="text-black/50 truncate pr-2 font-medium">{spec.key}</span>
+                    <span className="font-bold text-black truncate">{spec.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         ) : (
           <div className="block relative aspect-[3/4] w-full bg-[#f9f9f9] overflow-hidden" />
         )}
@@ -222,20 +246,22 @@ export function ProductCard({
         {/* 3. Mobile Carousel Arrows - Moved here to be outside Link but over image */}
         <div className="md:hidden">
           {carouselImages.length > 1 && (
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-0 z-20 pointer-events-none">
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-0 z-[35] pointer-events-none">
               <button
-                onClick={prevImage}
+                onPointerDown={prevImage}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                 type="button"
-                className="w-7 h-7 flex items-center justify-center bg-white/25 backdrop-blur-[1px] text-black/45 active:text-black transition-all pointer-events-auto"
+                className="w-8 h-8 flex items-center justify-center bg-white/40 backdrop-blur-md text-black shadow-sm active:scale-90 transition-all pointer-events-auto touch-manipulation"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M15 18l-6-6 6-6" /></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
               </button>
               <button
-                onClick={nextImage}
+                onPointerDown={nextImage}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                 type="button"
-                className="w-7 h-7 flex items-center justify-center bg-white/25 backdrop-blur-[1px] text-black/45 active:text-black transition-all pointer-events-auto"
+                className="w-8 h-8 flex items-center justify-center bg-white/40 backdrop-blur-md text-black shadow-sm active:scale-90 transition-all pointer-events-auto touch-manipulation"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M9 18l6-6-6-6" /></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
               </button>
             </div>
           )}

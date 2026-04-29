@@ -10,6 +10,8 @@ export async function GET(request: Request) {
   const subcategorySlug = searchParams.get("subcategorySlug");
   const sort = searchParams.get("sort") || "newest";
 
+  const search = searchParams.get("search");
+
   const skip = (page - 1) * limit;
 
   const whereClause: any = { isActive: true };
@@ -19,6 +21,16 @@ export async function GET(request: Request) {
     whereClause.subcategory = {
       category: { slug: categorySlug }
     };
+  }
+
+  if (search) {
+    whereClause.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { name_uk: { contains: search, mode: 'insensitive' } },
+      { name_ru: { contains: search, mode: 'insensitive' } },
+      { name_pl: { contains: search, mode: 'insensitive' } },
+      { brand: { contains: search, mode: 'insensitive' } },
+    ];
   }
 
   let orderBy: any = { createdAt: "desc" };

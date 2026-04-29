@@ -20,9 +20,11 @@ import { NavigationLoader } from "@/components/NavigationLoader";
 import { ToastContainer } from "@/components/ToastContainer";
 
 export const metadata: Metadata = {
-  title: "Migra | Contextual Library",
-  description: "Modern e-commerce platform",
+  title: "Anvibud | Будівельні матеріали",
+  description: "Інтернет-магазин якісних будівельних матеріалів. Широкий асортимент, надійні виробники.",
 };
+
+import { AnnouncementBar } from "@/components/AnnouncementBar";
 
 export default async function RootLayout({
   children,
@@ -50,6 +52,7 @@ export default async function RootLayout({
           shadow="0 0 10px #000,0 0 5px #000"
         />
         <LanguageProvider initialLanguage={lang}>
+          <AnnouncementBar />
           <Header />
           {children}
 

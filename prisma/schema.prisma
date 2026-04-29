@@ -40,6 +40,7 @@ model Subcategory {
   name_ru    String?
   name_pl    String?
   slug       String    @unique
+  image      String?
   categoryId String
   category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   products   Product[]
@@ -75,6 +76,7 @@ model Product {
   isCustomOrder     Boolean       @default(false)
   brand             String?
   label             ProductLabel?
+  specifications    Json?
   subcategoryId     String
   subcategory       Subcategory   @relation(fields: [subcategoryId], references: [id], onDelete: Restrict)
   orderItems        OrderItem[]
@@ -113,4 +115,26 @@ model OrderItem {
 
   @@index([orderId])
   @@index([productId])
+}
+
+model SiteSettings {
+  id                 String   @id @default("global")
+  searchPlaceholders String[] @default(["Пошук товарів...", "Цемент М-500", "Газоблок"])
+  
+  // Announcement Bar
+  announcementActive    Boolean  @default(false)
+  announcementBgColor   String?  @default("#000000")
+  announcementTextColor String?  @default("#ffffff")
+  announcementSpeed     Int?     @default(30)
+  announcementItems     Json?    // Array of { text_uk, text_ru, text_pl, text_en, link }
+
+  updatedAt          DateTime @updatedAt
+}
+
+model CallbackRequest {
+  id        String   @id @default(cuid())
+  phone     String
+  status    String   @default("PENDING") // PENDING, CALLED, CANCELLED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

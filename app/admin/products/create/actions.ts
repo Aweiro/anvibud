@@ -25,6 +25,8 @@ export async function submitProduct(formData: FormData) {
     const brand = formData.get("brand") as string;
     const isCustomOrder = formData.get("isCustomOrder") === "on";
     const label = (formData.get("label") as any) || null;
+    const specificationsStr = formData.get("specifications") as string;
+    const specifications = specificationsStr ? JSON.parse(specificationsStr) : [];
 
     const files = formData.getAll("images") as File[];
     const imageUrls: string[] = [];
@@ -67,6 +69,7 @@ export async function submitProduct(formData: FormData) {
       brand,
       isCustomOrder,
       label,
+      specifications,
     });
 
     revalidatePath("/admin/products");
@@ -104,6 +107,8 @@ export async function editProductAction(id: string, formData: FormData, existing
     const brand = formData.get("brand") as string;
     const isCustomOrder = formData.get("isCustomOrder") === "on";
     const label = (formData.get("label") as any) || null;
+    const specificationsStr = formData.get("specifications") as string;
+    const specifications = specificationsStr ? JSON.parse(specificationsStr) : [];
 
     const files = formData.getAll("images") as File[];
     const uploadedImageUrls: string[] = [];
@@ -150,6 +155,7 @@ export async function editProductAction(id: string, formData: FormData, existing
         brand,
         isCustomOrder,
         label,
+        specifications,
       }
     });
 

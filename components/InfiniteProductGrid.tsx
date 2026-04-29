@@ -28,6 +28,7 @@ interface InfiniteProductGridProps {
     categorySlug?: string;
     subcategorySlug?: string;
     sort?: string;
+    search?: string;
     lang: string;
 }
 
@@ -37,6 +38,7 @@ export function InfiniteProductGrid({
     categorySlug,
     subcategorySlug,
     sort,
+    search,
     lang
 }: InfiniteProductGridProps) {
     const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -59,6 +61,7 @@ export function InfiniteProductGrid({
             });
             if (categorySlug) params.append("categorySlug", categorySlug);
             if (subcategorySlug) params.append("subcategorySlug", subcategorySlug);
+            if (search) params.append("search", search);
 
             const res = await fetch(`/api/products?${params.toString()}`);
             const data = await res.json();
@@ -91,7 +94,7 @@ export function InfiniteProductGrid({
         }
 
         return () => observer.disconnect();
-    }, [hasMore, page, loading, sort]); // Added deps to ensure it reacts to state changes
+    }, [hasMore, page, loading, sort, search]); // Added deps to ensure it reacts to state changes
 
     // Reset when sort or slugs change
     useEffect(() => {
@@ -116,6 +119,7 @@ export function InfiniteProductGrid({
                         discountAmount={Number(product.discountAmount)}
                         sizes={product.sizes}
                         label={product.label as any}
+                        specifications={product.specifications}
                     />
                 ))}
 

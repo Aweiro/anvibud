@@ -84,29 +84,29 @@ export default function AdminDashboardPage() {
                     </div>
                 </Link>
 
-                {/* Orders Module (Locked) */}
-                <div className="relative border border-black/10 dark:border-white/10 p-8 bg-black/[0.02] dark:bg-white/[0.02] cursor-not-allowed overflow-hidden">
-                    <div className="absolute top-4 right-4 text-[9px] font-mono font-black opacity-10">
+                {/* Orders Module */}
+                <Link
+                    href="/admin/orders"
+                    className="group relative border border-black dark:border-white p-8 bg-white dark:bg-black hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all overflow-hidden"
+                >
+                    <div className="absolute top-4 right-4 text-[9px] font-mono font-black opacity-20 group-hover:opacity-100 transition-opacity">
                         [03]
                     </div>
-                    <div className="space-y-10">
+                    <div className="space-y-10 relative z-10">
                         <div className="space-y-2">
-                            <div className="flex items-center gap-3">
-                                <h2 className="text-3xl font-black uppercase tracking-tight opacity-20">Orders</h2>
-                                <span className="text-[8px] font-black bg-black dark:bg-white text-white dark:text-black px-2 py-0.5">STANDBY</span>
-                            </div>
-                            <p className="text-[9px] uppercase tracking-widest leading-relaxed opacity-10">
+                            <h2 className="text-3xl font-black uppercase tracking-tight">Orders</h2>
+                            <p className="text-[9px] uppercase tracking-widest leading-relaxed opacity-60">
                                 Transactional Ledger // Logistic Routing // Fulfillment Queue Terminal
                             </p>
                         </div>
-                        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] opacity-20">
-                            <span>MODULE_LOCKED</span>
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em]">
+                            <span>ACCESS_LEDGER</span>
+                            <svg className="w-4 h-4 transition-transform group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
                         </div>
                     </div>
-                </div>
+                </Link>
             </div>
 
             {/* Quick-Inject Shortcuts Section */}

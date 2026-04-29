@@ -43,9 +43,15 @@ export async function createSubcategory(formData: FormData) {
         const name = formData.get("name") as string;
         const slug = formData.get("slug") as string;
         const categoryId = formData.get("categoryId") as string;
+        const imageFile = formData.get("image") as File | null;
 
         if (!name || !slug || !categoryId) {
             throw new Error("Name, Slug, and Category are required.");
+        }
+
+        let imageUrl = null;
+        if (imageFile && imageFile.size > 0) {
+            imageUrl = await uploadImage(imageFile);
         }
 
         await prisma.subcategory.create({
@@ -55,7 +61,8 @@ export async function createSubcategory(formData: FormData) {
                 name_ru: (formData.get("name_ru") as string) || null,
                 name_pl: (formData.get("name_pl") as string) || null,
                 slug,
-                categoryId,
+                image: imageUrl,
+                category: { connect: { id: categoryId } },
             },
         });
 
@@ -111,21 +118,29 @@ export async function updateSubcategory(id: string, formData: FormData) {
         const name = formData.get("name") as string;
         const slug = formData.get("slug") as string;
         const categoryId = formData.get("categoryId") as string;
+        const imageFile = formData.get("image") as File | null;
 
         if (!name || !slug || !categoryId) {
             throw new Error("Name, Slug, and Category are required.");
         }
 
+        let dataToUpdate: any = {
+            name,
+            name_uk: (formData.get("name_uk") as string) || null,
+            name_ru: (formData.get("name_ru") as string) || null,
+            name_pl: (formData.get("name_pl") as string) || null,
+            slug,
+            category: { connect: { id: categoryId } },
+        };
+
+        if (imageFile && imageFile.size > 0) {
+            const imageUrl = await uploadImage(imageFile);
+            dataToUpdate.image = imageUrl;
+        }
+
         await prisma.subcategory.update({
             where: { id },
-            data: {
-                name,
-                name_uk: (formData.get("name_uk") as string) || null,
-                name_ru: (formData.get("name_ru") as string) || null,
-                name_pl: (formData.get("name_pl") as string) || null,
-                slug,
-                categoryId,
-            },
+            data: dataToUpdate,
         });
 
         revalidatePath("/admin/categories");

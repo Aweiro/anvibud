@@ -57,6 +57,27 @@ export default function ProductForm({
     const [brandQuery, setBrandQuery] = useState(product?.brand || "");
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
+    // Specifications State
+    const [specifications, setSpecifications] = useState<{ key: string, value: string }[]>(
+        product?.specifications && Array.isArray(product.specifications) 
+            ? product.specifications 
+            : []
+    );
+
+    const handleAddSpecification = () => {
+        setSpecifications([...specifications, { key: "", value: "" }]);
+    };
+
+    const handleRemoveSpecification = (index: number) => {
+        setSpecifications(specifications.filter((_, i) => i !== index));
+    };
+
+    const handleSpecificationChange = (index: number, field: "key" | "value", value: string) => {
+        const newSpecs = [...specifications];
+        newSpecs[index][field] = value;
+        setSpecifications(newSpecs);
+    };
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const newFiles = Array.from(e.target.files);
@@ -156,6 +177,7 @@ export default function ProductForm({
         formData.set("subcategoryId", selectedSubcategoryId);
         formData.set("label", selectedLabel);
         formData.set("brand", brandQuery);
+        formData.set("specifications", JSON.stringify(specifications.filter(s => s.key.trim() !== "" && s.value.trim() !== "")));
 
         newImages.forEach((img) => formData.append("images", img));
 
@@ -512,6 +534,55 @@ export default function ProductForm({
                                     placeholder="XS, S, M, L, XL, OS"
                                     className="w-full bg-white dark:bg-zinc-900 border border-black/20 dark:border-white/20 px-4 py-4 rounded-none text-xs text-black dark:text-white font-bold uppercase tracking-widest outline-none focus:border-black dark:focus:border-white transition-all"
                                 />
+                            </div>
+                        </div>
+
+                        {/* Specifications */}
+                        <div className="space-y-6">
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-black/30 dark:text-white/30">05.5 // Technical Specifications</span>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <label className="block text-[10px] uppercase font-black tracking-widest text-black dark:text-white">Key-Value Pairs</label>
+                                    <button
+                                        type="button"
+                                        onClick={handleAddSpecification}
+                                        className="text-[9px] font-black uppercase tracking-[0.2em] border-b border-black/20 hover:border-black transition-all"
+                                    >
+                                        [+] Add Attribute
+                                    </button>
+                                </div>
+                                <div className="space-y-2">
+                                    {specifications.map((spec, index) => (
+                                        <div key={index} className="flex gap-2 items-center">
+                                            <input
+                                                type="text"
+                                                value={spec.key}
+                                                onChange={(e) => handleSpecificationChange(index, "key", e.target.value)}
+                                                placeholder="Напруга акумулятора"
+                                                className="flex-1 bg-white dark:bg-zinc-900 border border-black/20 dark:border-white/20 px-3 py-3 rounded-none text-xs text-black dark:text-white font-bold outline-none focus:border-black dark:focus:border-white transition-all"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={spec.value}
+                                                onChange={(e) => handleSpecificationChange(index, "value", e.target.value)}
+                                                placeholder="20V"
+                                                className="flex-1 bg-white dark:bg-zinc-900 border border-black/20 dark:border-white/20 px-3 py-3 rounded-none text-xs text-black dark:text-white font-bold outline-none focus:border-black dark:focus:border-white transition-all"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveSpecification(index)}
+                                                className="w-10 h-10 flex items-center justify-center bg-red-500 text-white font-black hover:bg-red-600 transition-colors"
+                                            >
+                                                X
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {specifications.length === 0 && (
+                                        <div className="text-center py-6 border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] text-[10px] uppercase tracking-widest text-black/40">
+                                            No technical specifications added.
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 

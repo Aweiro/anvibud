@@ -247,34 +247,32 @@ export default function CategoryForm({
                             />
                         </div>
 
-                        {activeTab === "category" && (
-                            <div>
-                                <label className="block text-[10px] uppercase font-black tracking-widest mb-2 text-black dark:text-white">
-                                    Node_Graphic_Asset
-                                </label>
-                                {item?.image && (
-                                    <div className="mb-6 p-4 border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] flex items-center gap-6">
-                                        <img src={item.image} alt={item.name} className="w-24 h-24 object-cover grayscale brightness-90 border border-black/20 dark:border-white/20" />
-                                        <div className="space-y-1 overflow-hidden">
-                                            <span className="text-[8px] uppercase font-black text-black/40 dark:text-white/40">Current_Asset_Active</span>
-                                            <p className="text-[9px] font-mono text-black/60 dark:text-white/60 break-all truncate">{item.image.split('/').pop()}</p>
-                                        </div>
-                                    </div>
-                                )}
-                                <div className="border border-black/20 dark:border-white/20 p-8 text-center relative group cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-all">
-                                    <input
-                                        type="file"
-                                        name="image"
-                                        accept="image/*"
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                    />
-                                    <div className="space-y-1">
-                                        <div className="text-[9px] text-black dark:text-white font-black uppercase tracking-[0.3em]">{item?.image ? "Overwrite_Asset" : "Select_File"}</div>
-                                        <div className="text-[8px] uppercase tracking-widest text-black/30 dark:text-white/30 bg-transparent">JPG / PNG / WEBP</div>
+                        <div>
+                            <label className="block text-[10px] uppercase font-black tracking-widest mb-2 text-black dark:text-white">
+                                {activeTab === "category" ? "Node_Graphic_Asset" : "Sub_Node_Graphic_Asset"}
+                            </label>
+                            {item?.image && (
+                                <div className="mb-6 p-4 border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] flex items-center gap-6">
+                                    <img src={item.image} alt={item.name} className="w-24 h-24 object-cover grayscale brightness-90 border border-black/20 dark:border-white/20" />
+                                    <div className="space-y-1 overflow-hidden">
+                                        <span className="text-[8px] uppercase font-black text-black/40 dark:text-white/40">Current_Asset_Active</span>
+                                        <p className="text-[9px] font-mono text-black/60 dark:text-white/60 break-all truncate">{item.image.split('/').pop()}</p>
                                     </div>
                                 </div>
+                            )}
+                            <div className="border border-black/20 dark:border-white/20 p-8 text-center relative group cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-all">
+                                <input
+                                    type="file"
+                                    name="image"
+                                    accept="image/*"
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                />
+                                <div className="space-y-1">
+                                    <div className="text-[9px] text-black dark:text-white font-black uppercase tracking-[0.3em]">{item?.image ? "Overwrite_Asset" : "Select_File"}</div>
+                                    <div className="text-[8px] uppercase tracking-widest text-black/30 dark:text-white/30 bg-transparent">JPG / PNG / WEBP</div>
+                                </div>
                             </div>
-                        )}
+                        </div>
 
                         {activeTab === "subcategory" && (
                             <div className="relative" ref={dropdownRef}>

@@ -30,14 +30,14 @@ export function NavigationLoader() {
 
             {/* Brand Identity */}
             <motion.div
-                className="flex gap-5"
+                className="flex gap-4"
                 animate={{ opacity: [0.3, 1, 0.3] }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             >
-                {["M", "I", "G", "R", "A"].map((char, i) => (
+                {["A", "N", "V", "I", "B", "U", "D"].map((char, i) => (
                     <span
                         key={i}
-                        className="text-[14px] font-black tracking-[0.5em] text-black dark:text-white navigation-loader-text"
+                        className="text-[14px] font-black tracking-[0.4em] text-black dark:text-white navigation-loader-text"
                     >
                         {char}
                     </span>

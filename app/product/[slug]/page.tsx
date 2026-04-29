@@ -48,7 +48,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     const discountPercent = hasDiscount ? Math.round((discountAmount / price) * 100) : 0;
 
     // Fetch related products (same subcategory)
-    const relatedProducts = await prisma.product.findMany({
+    const rawRelatedProducts = await prisma.product.findMany({
         where: {
             subcategoryId: product.subcategoryId,
             id: { not: product.id }
@@ -56,6 +56,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         take: 11,
         orderBy: { createdAt: "desc" }
     });
+
+    const relatedProducts = rawRelatedProducts.map(p => ({
+        ...p,
+        price: Number(p.price),
+        discountAmount: Number(p.discountAmount)
+    }));
 
     const catName = (lang === 'en' ? product.subcategory.category.name : (product.subcategory.category as any)[`name_${lang}`] || product.subcategory.category.name);
     const subName = (lang === 'en' ? product.subcategory.name : (product.subcategory as any)[`name_${lang}`] || product.subcategory.name);
@@ -90,7 +96,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     </nav>
 
                     <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-4 w-full sm:w-auto border-t sm:border-t-0 border-black/[0.05] pt-4 sm:pt-0">
-                        <span className="text-[10px] uppercase tracking-[0.5em] font-black text-black/20">MIGRA®</span>
+                        <span className="text-[10px] uppercase tracking-[0.5em] font-black text-black/20">ANVIBUD®</span>
                         <div className="w-12 h-[1px] bg-black/10 hidden xl:block" />
                         <div className="flex items-center gap-2">
                             <div className="w-1 h-1 rounded-full bg-black animate-pulse" />
@@ -151,23 +157,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     </div>
                 </div>
 
-                {/* Bottom Section: Details, Specs, Shipping (Full width or contained grid below) */}
+                {/* Bottom Section: Details, Specs, Shipping */}
                 <div className="mt-16 pt-12 border-t border-black/5">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-24">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24 mb-16">
                         <div className="space-y-6">
                             <h3 className="text-[11px] uppercase tracking-[0.4em] font-black border-b border-black pb-4 inline-block text-black">{t('product.description')}</h3>
                             <div className="text-xs font-light leading-loose text-black/70 whitespace-pre-wrap">
                                 {(product as any)[`description_${lang}`] || product.description || t('product.default_desc')}
                             </div>
-                        </div>
-                        <div className="space-y-6">
-                            <h3 className="text-[11px] uppercase tracking-[0.4em] font-black border-b border-black pb-4 inline-block text-black">{t('product.specifications')}</h3>
-                            <ul className="space-y-3 text-[11px] uppercase tracking-[0.2em] text-black/60 list-disc list-inside bg-[#f9f9f9] p-6">
-                                <li>{t('product.spec_1')}</li>
-                                <li>{t('product.spec_2')}</li>
-                                <li>{t('product.spec_3')}</li>
-                                <li>{t('product.spec_ref')}: {product.id.slice(0, 8).toUpperCase()}</li>
-                            </ul>
                         </div>
                         <div className="space-y-6">
                             <h3 className="text-[11px] uppercase tracking-[0.4em] font-black border-b border-black pb-4 inline-block text-black">{t('product.shipping_returns')}</h3>
@@ -177,6 +174,21 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                             </div>
                         </div>
                     </div>
+
+                    {/* Dynamic Specifications Table */}
+                    {product.specifications && Array.isArray(product.specifications) && product.specifications.length > 0 && (
+                        <div className="space-y-4">
+                            <h3 className="text-lg md:text-xl font-black text-black">{t('product.specifications') || 'Характеристики'}</h3>
+                            <div className="flex flex-col border-t border-black/5">
+                                {(product.specifications as {key: string, value: string}[]).map((spec, idx) => (
+                                    <div key={idx} className={`grid grid-cols-2 py-3 px-4 ${idx % 2 === 0 ? 'bg-zinc-50' : 'bg-white'}`}>
+                                        <div className="text-[11px] md:text-xs font-medium text-black/60 pr-4">{spec.key}</div>
+                                        <div className="text-[11px] md:text-xs font-bold text-black">{spec.value}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Related Products */}

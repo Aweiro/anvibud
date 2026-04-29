@@ -126,3 +126,17 @@ body.is-admin .navigation-loader-bar {
 body.is-admin .navigation-loader-text {
   color: white !important;
 }
+
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+
+.animate-shake {
+  animation: shake 0.3s ease-in-out infinite;
+}
+
+body.is-admin .announcement-bar {
+  display: none !important;
+}

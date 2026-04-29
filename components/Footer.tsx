@@ -44,7 +44,10 @@ export function Footer() {
                     {/* Brand Column */}
                     <div className="space-y-10 lg:col-span-1">
                         <div>
-                            <h2 className="text-4xl font-black tracking-[0.3em] mb-4">MIGRA</h2>
+                            <h2 className="text-4xl font-black tracking-tighter mb-4 italic flex items-center gap-2">
+                                <span className="bg-white text-black px-2 py-0.5 transform -skew-x-12">ANVI</span>
+                                <span>BUD</span>
+                            </h2>
                             <p className="text-[11px] uppercase tracking-[0.2em] leading-loose text-white/40 max-w-xs">
                                 {t('footer.tagline')}
                             </p>
@@ -107,7 +110,7 @@ export function Footer() {
                         <span className="hover:text-white cursor-pointer transition-colors">{t('footer.accessibility')}</span>
                     </div>
                     <div className="text-[10px] uppercase tracking-[0.4em] font-black text-white/20">
-                        MIGRA © 2026. {t('home.contextual_library')}.
+                        ANVIBUD © 2026. {t('all_rights_reserved')}.
                     </div>
                 </div>
             </div>
