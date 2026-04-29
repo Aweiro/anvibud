@@ -40,11 +40,13 @@ export function ProductInfoClient({ product, prodName }: ProductInfoClientProps)
         }
     }, [searchParams, product.sizes]);
 
-    const handleSizeSelect = (size: string) => {
+    const handleSizeSelect = (size: string | null) => {
         setSelectedSize(size);
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("size", size);
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        if (size) {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("size", size);
+            router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        }
     };
 
     // Initial prices from server
