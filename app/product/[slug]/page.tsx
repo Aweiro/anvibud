@@ -87,7 +87,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                             <div key={crumb.href} className="flex items-center gap-2">
                                 <Link
                                     href={crumb.href}
-                                    className={`${i === breadcrumbs.length - 1 ? "text-black" : "text-black/30 hover:text-black"} transition-colors whitespace-nowrap`}
+                                    className={`${i === breadcrumbs.length - 1 ? "text-black" : "text-black/30 hover:text-black"} transition-colors break-words`}
                                 >
                                     {crumb.label}
                                 </Link>

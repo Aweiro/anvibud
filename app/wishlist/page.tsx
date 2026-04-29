@@ -166,7 +166,7 @@ function WishlistItem({ item, onRemove }: WishlistItemProps) {
                 {/* Remove button */}
                 <button
                     onClick={() => onRemove(item.id)}
-                    className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center bg-white/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center bg-black/[0.03] backdrop-blur-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-black/5 text-black/20 hover:text-black z-30"
                     aria-label="Remove from wishlist"
                 >
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -258,7 +258,7 @@ export default function WishlistPage() {
 
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-black/[0.1] pb-6 mb-6 md:mb-12">
-                    <nav className="flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-black text-black/30">
+                    <nav className="flex flex-wrap items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-black text-black/30">
                         <Link href="/" className="hover:text-black transition-colors">{t('common.home')}</Link>
                         <span>/</span>
                         <span className="text-black">{t('wishlist.title')}</span>
@@ -275,7 +275,7 @@ export default function WishlistPage() {
 
                 {items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-32 gap-8 text-center">
-                        <div className="text-[80px] leading-none opacity-5 font-black uppercase tracking-tighter select-none">{t('wishlist.title')}</div>
+                        <div className="text-[80px] md:text-[120px] leading-none opacity-5 font-black uppercase tracking-tighter select-none max-w-full overflow-hidden text-center">{t('wishlist.title')}</div>
                         <div className="space-y-3">
                             <h1 className="text-2xl font-black uppercase tracking-tighter text-black">{t('wishlist.empty_title')}</h1>
                             <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-black/30">{t('wishlist.empty_desc')}</p>

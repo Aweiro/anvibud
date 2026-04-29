@@ -444,7 +444,7 @@ export async function Storefront({
                             </Link>
                         </div>
                         <div className="mt-4">
-                            <ProductSlider products={saleProducts.slice(0, 15)} />
+                            <ProductSlider products={saleProducts.slice(0, 15)} lang={lang} />
                         </div>
                     </div>
                 </div>

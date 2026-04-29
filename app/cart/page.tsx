@@ -49,14 +49,14 @@ export default function CartPage() {
       <div className="mx-auto w-full max-w-[1500px] px-6 mb-8 md:mb-16">
         <div className="flex items-center justify-between border-b border-black/[0.1] pb-6 mb-6 md:mb-12">
           <div className="flex items-center gap-6">
-            <nav className="flex items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-black text-black/30">
+            <nav className="flex flex-wrap items-center gap-2 text-[9px] uppercase tracking-[0.3em] font-black text-black/30">
               <Link href="/" className="hover:text-black transition-colors">{t('common.home')}</Link>
               <span>/</span>
               <span className="text-black">{t('cart.title')}</span>
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-[10px] uppercase tracking-[0.5em] font-black text-black/20">MIGRA®</span>
+            <span className="text-[10px] uppercase tracking-[0.5em] font-black text-black/20">ANVIBUD®</span>
             <div className="w-12 h-[1px] bg-black/10 hidden sm:block" />
             <div className="flex items-center gap-2">
               <div className="w-1 h-1 rounded-full bg-black" />
@@ -67,7 +67,7 @@ export default function CartPage() {
 
         {items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-32 gap-8 text-center">
-            <div className="text-[80px] leading-none opacity-5 font-black uppercase tracking-tighter select-none">{t('cart.empty')}</div>
+            <div className="text-[80px] md:text-[120px] leading-none opacity-5 font-black uppercase tracking-tighter select-none max-w-full overflow-hidden text-center">{t('cart.empty')}</div>
             <div className="space-y-3">
               <h1 className="text-2xl font-black uppercase tracking-tighter text-black">{t('cart.empty_title')}</h1>
               <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-black/30">{t('cart.empty_desc')}</p>
@@ -97,35 +97,57 @@ export default function CartPage() {
                 </div>
               </div>
               {items.map((item, i) => (
-                <div key={item.id} className={`flex flex-col md:grid md:grid-cols-[1fr_120px_100px_80px] gap-6 md:gap-8 p-5 mb-6 md:p-0 md:mb-0 md:py-8 items-center border border-black/[0.07] md:border-0 md:border-b md:border-black/[0.05] last:mb-0 md:last:border-0`}>
-                  {/* TOP: Product info + Quantity (Mobile) */}
-                  <div className="flex items-center justify-between w-full md:w-auto gap-5 flex-1">
-                    <div className="flex items-center gap-5">
-                      <div className="relative w-24 h-24 md:w-20 md:h-20 flex-shrink-0 bg-[#f9f9f9] overflow-hidden">
+                <div key={item.id} className={`flex flex-col md:grid md:grid-cols-[1fr_120px_100px_80px] gap-6 md:gap-8 p-5 mb-6 md:p-0 md:mb-0 md:py-8 items-center border border-black/[0.07] md:border-0 md:border-b md:border-black/[0.05] last:mb-0 md:last:border-0`}>                  {/* TOP: Product info + Quantity (Mobile) */}
+                  <div className="flex flex-col w-full md:contents gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="relative w-20 h-20 md:w-20 md:h-20 flex-shrink-0 bg-[#f9f9f9] overflow-hidden border border-black/[0.03]">
                         {item.image ? (
-                          <Image src={item.image} alt={item.title} fill className="object-cover" sizes="(max-width: 768px) 96px, 80px" />
+                          <Image src={item.image} alt={item.title} fill className="object-cover" sizes="(max-width: 768px) 80px, 80px" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-[8px] uppercase tracking-widest text-black/20 font-bold">{t('cart.no_image')}</div>
                         )}
                       </div>
-                      <div className="space-y-1">
-                        <h2 className="text-[9.5px] md:text-[11px] uppercase tracking-[0.2em] font-black text-black leading-tight">{item.title}</h2>
-                        <p className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] font-bold text-black/30">${item.price.toFixed(2)}</p>
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        <h2 className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-black text-black leading-snug break-words">
+                          {item.title}
+                        </h2>
+                        {item.size && (
+                          <span className="inline-block text-[8px] uppercase font-bold text-black/40 border border-black/5 px-1.5 py-0.5">
+                            {item.size}
+                          </span>
+                        )}
+                        <p className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] font-bold text-black/30">₴{item.price.toFixed(2)}</p>
                       </div>
                     </div>
 
-                    {/* Quantity controls on the right for mobile */}
-                    <div className="flex md:hidden items-center justify-between border border-black/10 flex-shrink-0 h-9">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-9 h-full flex items-center justify-center text-black/40 hover:text-black text-lg"
-                      >−</button>
-                      <span className="w-8 text-center text-[11px] font-black text-black">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-9 h-full flex items-center justify-center text-black/40 hover:text-black text-lg"
-                      >+</button>
+                    {/* Controls Row for Mobile */}
+                    <div className="flex items-center justify-between pt-4 border-t border-black/[0.03] md:hidden">
+                      <div className="flex items-center border border-black/10 h-8">
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="w-8 h-full flex items-center justify-center text-black/40 hover:text-black text-base"
+                        >−</button>
+                        <span className="w-8 text-center text-[10px] font-black text-black">{item.quantity}</span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="w-8 h-full flex items-center justify-center text-black/40 hover:text-black text-base"
+                        >+</button>
+                      </div>
+                      
+                      <div className="text-right">
+                        <span className="block text-[8px] uppercase tracking-[0.2em] font-bold text-black/20 mb-0.5">Total</span>
+                        <span className="text-[11px] font-black tracking-widest text-black">
+                          ₴{(item.price * item.quantity).toFixed(2)}
+                        </span>
+                      </div>
                     </div>
+
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="md:hidden text-[9px] uppercase tracking-[0.4em] font-black text-black/30 hover:text-black transition-colors self-start"
+                    >
+                      {t('common.remove')}
+                    </button>
                   </div>
 
                   {/* Quantity (Desktop Only) */}
@@ -141,22 +163,19 @@ export default function CartPage() {
                     >+</button>
                   </div>
 
-                  {/* BOTTOM/GRID: Price and Remove (Mobile - side by side) */}
-                  <div className="flex items-center justify-between w-full md:contents mt-2 md:mt-0 pt-4 md:pt-0 border-t border-black/[0.03] md:border-0">
-                    <div className="flex flex-col md:block md:text-right">
-                      <span className="md:hidden text-[9px] uppercase tracking-[0.3em] font-bold text-black/20 mb-1">Total</span>
-                      <span className="text-[11px] font-black tracking-widest text-black">
-                        ${(item.price * item.quantity).toFixed(2)}
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-[9px] uppercase tracking-[0.4em] font-black text-black/30 hover:text-black transition-colors md:text-left"
-                    >
-                      {t('common.remove')}
-                    </button>
+                  {/* BOTTOM/GRID: Price and Remove (Desktop) */}
+                  <div className="hidden md:flex flex-col md:text-right">
+                    <span className="text-[11px] font-black tracking-widest text-black">
+                      ₴{(item.price * item.quantity).toFixed(2)}
+                    </span>
                   </div>
+
+                  <button
+                    onClick={() => removeFromCart(item.id)}
+                    className="hidden md:block text-[9px] uppercase tracking-[0.4em] font-black text-black/30 hover:text-black transition-colors md:text-left"
+                  >
+                    {t('common.remove')}
+                  </button>
                 </div>
               ))}
 
@@ -169,7 +188,7 @@ export default function CartPage() {
               <div className="space-y-4">
                 <div className="flex justify-between text-[10px] uppercase tracking-[0.2em] font-bold text-black/40">
                   <span>{t('cart.subtotal')} ({items.reduce((a, b) => a + b.quantity, 0)} {t('cart.items')})</span>
-                  <span>${totalPrice.toFixed(2)}</span>
+                  <span>₴{totalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-[10px] uppercase tracking-[0.2em] font-bold text-black/40">
                   <span>{t('cart.shipping')}</span>
@@ -177,7 +196,7 @@ export default function CartPage() {
                 </div>
                 <div className="border-t border-black/[0.06] pt-4 flex justify-between">
                   <span className="text-[11px] uppercase tracking-[0.3em] font-black text-black">{t('common.total')}</span>
-                  <span className="text-[13px] font-black tracking-widest text-black">${totalPrice.toFixed(2)}</span>
+                  <span className="text-[13px] font-black tracking-widest text-black">₴{totalPrice.toFixed(2)}</span>
                 </div>
               </div>
 

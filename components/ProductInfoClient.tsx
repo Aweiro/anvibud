@@ -91,7 +91,7 @@ export function ProductInfoClient({ product, prodName }: ProductInfoClientProps)
         <div className="sticky top-28 space-y-10">
             {/* Title & Price */}
             <div className="space-y-4 text-black">
-                <h1 className="text-4xl lg:text-5xl font-black uppercase tracking-tighter leading-[0.9] text-black">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tighter leading-[0.9] text-black break-words">
                     {prodName}
                 </h1>
 

@@ -119,7 +119,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                             <div className="border-y border-black/5 py-6">
                                 <div className="flex justify-between items-center text-[10px] uppercase tracking-[0.2em] font-bold text-black/60">
                                     <span>{t('cart.subtotal')}</span>
-                                    <span>${totalPrice.toFixed(2)}</span>
+                                    <span>₴{totalPrice.toFixed(2)}</span>
                                 </div>
                             </div>
 
@@ -159,7 +159,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                                     disabled={isSubmitting}
                                     className="w-full bg-black text-white py-5 text-[10px] uppercase tracking-[0.4em] font-black hover:bg-black/90 active:scale-[0.98] transition-all disabled:opacity-50"
                                 >
-                                    {isSubmitting ? t('checkout.processing') : `${t('checkout.complete_purchase')}${totalPrice.toFixed(2)}`}
+                                    {isSubmitting ? t('checkout.processing') : `${t('checkout.complete_purchase')} ₴${totalPrice.toFixed(2)}`}
                                 </button>
 
                                 <p className="text-center text-black/20 text-[8px] uppercase tracking-widest leading-relaxed">
