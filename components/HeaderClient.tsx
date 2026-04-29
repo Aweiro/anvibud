@@ -25,7 +25,8 @@ type Category = {
     name_ru?: string | null;
     name_pl?: string | null;
     slug: string;
-    subcategories: Subcategory[]
+    subcategories: Subcategory[];
+    image?: string | null;
 };
 
 export function HeaderClient({ 
