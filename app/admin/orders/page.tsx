@@ -31,8 +31,12 @@ export default function AdminOrdersPage() {
             getCallbackRequests()
         ]);
 
-        if (ordersRes.success) setOrders(ordersRes.data);
-        if (callbacksRes.success) setCallbacks(callbacksRes.data);
+        if (ordersRes.success && ordersRes.data) {
+            setOrders(Array.isArray(ordersRes.data) ? ordersRes.data : []);
+        }
+        if (callbacksRes.success && callbacksRes.data) {
+            setCallbacks(Array.isArray(callbacksRes.data) ? callbacksRes.data : []);
+        }
         setLoading(false);
     };
 
