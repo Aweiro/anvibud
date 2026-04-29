@@ -12,6 +12,7 @@ interface Category {
     name_pl?: string | null;
     slug: string;
     image?: string | null;
+    [key: string]: any;
 }
 
 interface CategoryGridProps {
