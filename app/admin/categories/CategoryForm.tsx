@@ -39,10 +39,51 @@ export default function CategoryForm({
         pl: item?.name_pl || "",
     });
     const [isTranslating, setIsTranslating] = useState(false);
+    const [preview, setPreview] = useState<string | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     const [selectedCategoryId, setSelectedCategoryId] = useState(item?.categoryId || "");
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (preview) URL.revokeObjectURL(preview);
+            setPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            const file = e.dataTransfer.files[0];
+            if (preview) URL.revokeObjectURL(preview);
+            setPreview(URL.createObjectURL(file));
+            
+            // We also need to manually trigger the file input if we want the form to pick it up on submit
+            // since the hidden input won't have it. But we can also handle it via state.
+            // However, this form uses FormData from e.currentTarget.
+            // So we should either use a state for the file or manually set the file to the input.
+            const fileInput = document.querySelector('input[name="image"]') as HTMLInputElement;
+            if (fileInput) {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+            }
+        }
+    };
 
     const handleNameChange = (lang: string, value: string) => {
         setNames(prev => ({ ...prev, [lang]: value }));
@@ -251,24 +292,36 @@ export default function CategoryForm({
                             <label className="block text-[10px] uppercase font-black tracking-widest mb-2 text-black dark:text-white">
                                 {activeTab === "category" ? "Node_Graphic_Asset" : "Sub_Node_Graphic_Asset"}
                             </label>
-                            {item?.image && (
+                            {(preview || item?.image) && (
                                 <div className="mb-6 p-4 border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] flex items-center gap-6">
-                                    <img src={item.image} alt={item.name} className="w-24 h-24 object-cover grayscale brightness-90 border border-black/20 dark:border-white/20" />
+                                    <img src={preview || item.image} alt="Preview" className="w-24 h-24 object-cover grayscale brightness-90 border border-black/20 dark:border-white/20" />
                                     <div className="space-y-1 overflow-hidden">
-                                        <span className="text-[8px] uppercase font-black text-black/40 dark:text-white/40">Current_Asset_Active</span>
-                                        <p className="text-[9px] font-mono text-black/60 dark:text-white/60 break-all truncate">{item.image.split('/').pop()}</p>
+                                        <span className="text-[8px] uppercase font-black text-black/40 dark:text-white/40">
+                                            {preview ? "New_Asset_Staged" : "Current_Asset_Active"}
+                                        </span>
+                                        <p className="text-[9px] font-mono text-black/60 dark:text-white/60 break-all truncate">
+                                            {preview ? "Ready_for_Upload" : item.image.split('/').pop()}
+                                        </p>
                                     </div>
                                 </div>
                             )}
-                            <div className="border border-black/20 dark:border-white/20 p-8 text-center relative group cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-all">
+                            <div 
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                                className={`border-2 border-dashed p-8 text-center relative group cursor-pointer transition-all ${isDragging ? "border-black bg-black/5 dark:border-white dark:bg-white/5" : "border-black/20 dark:border-white/20 hover:bg-black/5 dark:hover:bg-white/5"}`}
+                            >
                                 <input
                                     type="file"
                                     name="image"
                                     accept="image/*"
+                                    onChange={handleFileChange}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                 />
                                 <div className="space-y-1">
-                                    <div className="text-[9px] text-black dark:text-white font-black uppercase tracking-[0.3em]">{item?.image ? "Overwrite_Asset" : "Select_File"}</div>
+                                    <div className="text-[9px] text-black dark:text-white font-black uppercase tracking-[0.3em]">
+                                        {isDragging ? "Drop_Asset_Now" : (preview || item?.image) ? "Overwrite_Asset" : "Select_File_or_Drag_Here"}
+                                    </div>
                                     <div className="text-[8px] uppercase tracking-widest text-black/30 dark:text-white/30 bg-transparent">JPG / PNG / WEBP</div>
                                 </div>
                             </div>

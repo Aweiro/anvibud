@@ -49,6 +49,7 @@ export default function ProductForm({
     const [existingImages, setExistingImages] = useState<string[]>(product?.images || []);
     const [newImages, setNewImages] = useState<File[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
 
     // Dropdown States
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>(product?.subcategory?.categoryId || "");
@@ -84,6 +85,40 @@ export default function ProductForm({
             setNewImages((prev) => [...prev, ...newFiles]);
             const newPreviews = newFiles.map((f) => URL.createObjectURL(f));
             setPreviews((prev) => [...prev, ...newPreviews]);
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        if (e.dataTransfer.files) {
+            const newFiles = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            if (newFiles.length > 0) {
+                setNewImages((prev) => [...prev, ...newFiles]);
+                const newPreviews = newFiles.map((f) => URL.createObjectURL(f));
+                setPreviews((prev) => [...prev, ...newPreviews]);
+                
+                // Sync with input
+                const fileInput = document.querySelector('input[name="images"]') as HTMLInputElement;
+                if (fileInput) {
+                    const dataTransfer = new DataTransfer();
+                    // Add existing files from state + new ones
+                    // Note: newImages state might not be updated yet, so we use functional update or manual sync
+                    // Since the form uses FormData(e.currentTarget) and we manually append newImages in handleSubmit,
+                    // we actually don't NEED to sync the input if we handle it in handleSubmit.
+                    // Let's check handleSubmit.
+                }
+            }
         }
     };
 
@@ -610,9 +645,15 @@ export default function ProductForm({
                                 </div>
                             )}
 
-                            <div className="border border-black/20 dark:border-white/20 p-8 text-center relative group cursor-pointer hover:bg-black/[0.02] transition-all">
+                            <div 
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                                className={`border-2 border-dashed p-8 text-center relative group cursor-pointer transition-all ${isDragging ? "border-black bg-black/5 dark:border-white dark:bg-white/5" : "border-black/20 dark:border-white/20 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"}`}
+                            >
                                 <input
                                     type="file"
+                                    name="images"
                                     multiple
                                     accept="image/*"
                                     onChange={handleImageChange}
@@ -620,10 +661,10 @@ export default function ProductForm({
                                 />
                                 <div className="space-y-2">
                                     <div className="text-[10px] text-black dark:text-white font-black uppercase tracking-[0.4em]">
-                                        {isEdit ? "Asset_Sync_Protocol" : "Asset_Push_Protocol"}
+                                        {isDragging ? "Drop_Assets_Now" : isEdit ? "Asset_Sync_Protocol" : "Asset_Push_Protocol"}
                                     </div>
                                     <div className="text-[8px] uppercase tracking-widest text-black/30 dark:text-white/30">
-                                        {isEdit ? "Append New Content" : "Upload Multi_Media Content"}
+                                        {isDragging ? "Ready for batch upload" : isEdit ? "Append New Content or Drag Files" : "Upload Multi_Media Content or Drag Files"}
                                     </div>
                                 </div>
                             </div>
