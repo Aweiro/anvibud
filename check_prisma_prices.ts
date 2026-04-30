@@ -11,8 +11,7 @@ async function main() {
             id: true,
             name: true,
             price: true,
-            discount: true,
-            salePrice: true,
+            discountAmount: true,
             sizeVariants: true,
         }
     });
