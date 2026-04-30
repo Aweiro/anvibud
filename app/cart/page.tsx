@@ -11,7 +11,7 @@ import { getLatestPrices } from "@/lib/actions/products.actions";
 import { ConfirmModal } from "@/components/ConfirmModal";
 
 export default function CartPage() {
-  const { t, lang } = useLanguage();
+  const { t, language } = useLanguage();
   const items = useCartStore((state) => state.items);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeFromCart = useCartStore((state) => state.removeFromCart);
