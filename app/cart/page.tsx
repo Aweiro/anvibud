@@ -9,6 +9,7 @@ import { Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getLatestPrices } from "@/lib/actions/products.actions";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { CheckoutModal } from "@/components/CheckoutModal";
 
 export default function CartPage() {
   const { t, language } = useLanguage();
@@ -21,6 +22,7 @@ export default function CartPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasSynced, setHasSynced] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -239,7 +241,10 @@ export default function CartPage() {
                   <span className="text-[11px] uppercase tracking-[0.5em] font-black text-black">{t('cart.total')}</span>
                   <span className="text-2xl font-black tracking-tighter text-black leading-none">₴{totalPrice.toFixed(2)}</span>
                 </div>
-                <button className="w-full bg-black text-white py-4 text-[10px] uppercase tracking-[0.5em] font-black hover:bg-black/90 transition-all flex items-center justify-center gap-3 group">
+                <button 
+                  onClick={() => setIsCheckoutOpen(true)}
+                  className="w-full bg-black text-white py-4 text-[10px] uppercase tracking-[0.5em] font-black hover:bg-black/90 transition-all flex items-center justify-center gap-3 group"
+                >
                   {t('cart.checkout')}
                   <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </button>
@@ -255,6 +260,11 @@ export default function CartPage() {
         )}
       </div>
       <Footer />
+
+      <CheckoutModal 
+        isOpen={isCheckoutOpen} 
+        onClose={() => setIsCheckoutOpen(false)} 
+      />
     </main>
   );
 }
