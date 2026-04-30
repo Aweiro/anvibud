@@ -23,9 +23,11 @@ type ProductCardProps = {
   className?: string;
   sizes?: string[];
   label?: 'BESTSELLER' | 'NEW' | 'SALE' | null;
-  specifications?: any;
+  specifications?: { key: string, value: string }[];
   sizeVariants?: { size: string, price: string, salePrice?: string }[];
   baseSize?: string;
+  variant?: 'default' | 'wishlist';
+  onRemove?: (id: string) => void;
 };
 
 const formatPrice = (price: number, currency: string) =>
@@ -51,6 +53,8 @@ export function ProductCard({
   specifications,
   sizeVariants = [],
   baseSize,
+  variant = 'default',
+  onRemove,
 }: ProductCardProps) {
   const { t } = useLanguage();
   const [isAdded, setIsAdded] = useState(false);
@@ -130,6 +134,12 @@ export function ProductCard({
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (variant === 'wishlist' && onRemove) {
+      onRemove(id);
+      return;
+    }
+
     if (isWishlisted) {
       removeFromWishlist(id);
     } else {
@@ -146,6 +156,7 @@ export function ProductCard({
         selectedSize,
         sizeVariants,
         baseSize,
+        specifications,
       });
     }
   };
@@ -241,24 +252,28 @@ export function ProductCard({
           <div className="block relative aspect-[3/4] w-full bg-[#f9f9f9] overflow-hidden" />
         )}
 
-        {/* 2. detached Wishlist Button */}
+        {/* 2. detached Wishlist Button / Remove Button */}
         <button
           type="button"
           onClick={handleWishlist}
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center transition-all bg-white z-30"
-          aria-label="Toggle wishlist"
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center transition-all bg-white z-30 border border-black/5 hover:border-black/20"
+          aria-label={variant === 'wishlist' ? "Remove from wishlist" : "Toggle wishlist"}
         >
-          <svg
-            viewBox="0 0 24 24"
-            className={`h-4 w-4 transition-colors duration-300 ${mounted && isWishlisted ? "fill-black stroke-black" : "fill-none stroke-black"}`}
-          >
-            <path
-              d="M12 20.25c-4.5-4-7.5-6.85-7.5-10.25A4.22 4.22 0 0 1 8.75 5.75 4.7 4.7 0 0 1 12 7.06a4.7 4.7 0 0 1 3.25-1.31A4.22 4.22 0 0 1 19.5 10c0 3.4-3 6.25-7.5 10.25Z"
-              strokeWidth="1"
-              strokeLinecap="square"
-              strokeLinejoin="miter"
-            />
-          </svg>
+          {variant === 'wishlist' ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          ) : (
+            <svg
+              viewBox="0 0 24 24"
+              className={`h-4 w-4 transition-colors duration-300 ${mounted && isWishlisted ? "fill-black stroke-black" : "fill-none stroke-black"}`}
+            >
+              <path
+                d="M12 20.25c-4.5-4-7.5-6.85-7.5-10.25A4.22 4.22 0 0 1 8.75 5.75 4.7 4.7 0 0 1 12 7.06a4.7 4.7 0 0 1 3.25-1.31A4.22 4.22 0 0 1 19.5 10c0 3.4-3 6.25-7.5 10.25Z"
+                strokeWidth="1"
+                strokeLinecap="square"
+                strokeLinejoin="miter"
+              />
+            </svg>
+          )}
         </button>
 
         {/* 3. Image Carousel Arrows - Minimal Tab Design (Centered) */}
@@ -328,7 +343,9 @@ export function ProductCard({
         </div>
 
         {sizes.length > 0 && (
-          <div className={`flex flex-wrap gap-1 transition-all duration-300 lg:opacity-0 lg:group-hover:opacity-100 lg:translate-x-2 lg:group-hover:translate-x-0 ${showSizeError ? "scale-105" : ""}`}>
+          <div className={`flex flex-wrap gap-1 transition-all duration-300 ${
+            variant === 'wishlist' ? "opacity-100 translate-x-0" : "lg:opacity-0 lg:group-hover:opacity-100 lg:translate-x-2 lg:group-hover:translate-x-0"
+          } ${showSizeError ? "scale-105" : ""}`}>
             {(isExpanded ? sizes : sizes.slice(0, 5)).map((size) => (
               <button
                 key={size}
@@ -383,7 +400,11 @@ export function ProductCard({
           <button
             onClick={handleAddToCart}
             type="button"
-            className="w-full py-3 bg-black text-white text-[10px] uppercase font-bold tracking-[0.2em] lg:opacity-0 lg:group-hover:opacity-100 hover:bg-zinc-800 hover:tracking-[0.25em] active:scale-[0.98] transition-all duration-300 z-10 relative"
+            className={`w-full py-3 text-[10px] uppercase font-bold tracking-[0.2em] hover:tracking-[0.25em] active:scale-[0.98] transition-all duration-300 z-10 relative ${
+              variant === 'wishlist' 
+                ? "bg-white text-black border border-black/10 hover:bg-zinc-50 opacity-100" 
+                : "bg-black text-white hover:bg-zinc-800 lg:opacity-0 lg:group-hover:opacity-100"
+            }`}
           >
             {isAdded ? t('common.added') : (sizes.length > 0 && !selectedSize ? (showSizeError ? t('common.choose_size') : t('common.select_size')) : t('common.add_to_bag'))}
           </button>

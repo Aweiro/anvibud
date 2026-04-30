@@ -95,7 +95,7 @@ export function ProductActions({
                 id: product.id,
                 title: product.name,
                 price: product.price, // Base price (original)
-                discount: product.discount || (product.discountAmount ? Math.round((product.discountAmount / product.price) * 100) : 0),
+                discountAmount: product.discountAmount,
                 salePrice: product.salePrice,
                 image: product.image,
                 slug: product.slug,

@@ -16,6 +16,7 @@ export async function getLatestPrices(productIds: string[]) {
                 discountAmount: true,
                 sizeVariants: true,
                 stock: true,
+                specifications: true,
             }
         });
 
@@ -25,6 +26,7 @@ export async function getLatestPrices(productIds: string[]) {
             discountAmount: Number(p.discountAmount),
             sizeVariants: p.sizeVariants,
             stock: p.stock,
+            specifications: p.specifications,
         }));
     } catch (error) {
         console.error("Error fetching latest prices:", error);

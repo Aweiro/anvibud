@@ -16,6 +16,9 @@ export type WishlistProduct = {
     sizeVariants?: { size: string, price: string, salePrice?: string, stock?: string }[];
     baseSize?: string;
     label?: 'BESTSELLER' | 'NEW' | 'SALE' | null;
+    discountAmount?: number;
+    salePrice?: number;
+    specifications?: { key: string, value: string }[];
 };
 
 type WishlistStore = {
@@ -59,6 +62,7 @@ export const useWishlistStore = create<WishlistStore>()(
                             price: latest.price,
                             discountAmount: latest.discountAmount,
                             sizeVariants: latest.sizeVariants,
+                            specifications: latest.specifications,
                         };
                     })
                 }));
