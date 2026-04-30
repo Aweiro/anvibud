@@ -117,7 +117,8 @@ export function ProductInfoClient({ product, prodName }: ProductInfoClientProps)
                 product={{
                     ...product,
                     name: prodName,
-                    price: displayPrice,
+                    price: product.price, // Original price
+                    discountAmount: product.discountAmount,
                     stock: stock,
                 }}
                 sizes={product.sizes}

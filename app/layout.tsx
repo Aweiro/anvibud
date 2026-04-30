@@ -57,7 +57,7 @@ export default async function RootLayout({
           {children}
 
           {/* Global Navigation Overlay (Visible only when nprogress is active via CSS) */}
-          <div id="global-nav-loader" className="fixed inset-0 z-[9998] opacity-0 pointer-events-none flex items-center justify-center bg-white/40 backdrop-blur-[2px] transition-all duration-700 ease-in-out">
+          <div id="global-nav-loader" className="fixed inset-0 z-[10010] opacity-0 pointer-events-none flex items-center justify-center bg-white/40 backdrop-blur-[2px] transition-all duration-700 ease-in-out">
             <NavigationLoader />
           </div>
           <ToastContainer />

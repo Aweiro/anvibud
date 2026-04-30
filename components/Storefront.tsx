@@ -576,7 +576,7 @@ export async function Storefront({
             {/* Product Grid (Moved Up) */}
             <div className="mx-auto max-w-[1800px] px-6 pb-10">
                 <div className="flex items-center justify-between mt-6 mb-4 md:mb-8 border-b border-black pb-4 gap-4">
-                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 overflow-hidden">
+                    <div className="flex flex-col md:flex-row md:items-center w-full justify-between gap-2 md:gap-4 overflow-hidden">
                         <h3 className="text-[11px] uppercase tracking-[0.5em] font-black text-black truncate">
                             {totalProducts > 0 ? (categorySlug ? t('common.department_selection') : t('common.current_collection')) : t('common.end_of_library')}
                         </h3>

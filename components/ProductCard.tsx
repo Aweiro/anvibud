@@ -137,6 +137,7 @@ export function ProductCard({
         id,
         title,
         price, // Base price
+        discountAmount,
         image: typeof carouselImages[0] === "string" ? (carouselImages[0] as string) : undefined,
         hoverImage: typeof carouselImages[1] === "string" ? (carouselImages[1] as string) : undefined,
         allImages: carouselImages.every(img => typeof img === 'string') ? carouselImages as string[] : undefined,
@@ -181,42 +182,31 @@ export function ProductCard({
             }}
             className="block relative aspect-[3/4] w-full bg-[#f9f9f9] overflow-hidden group/img cursor-pointer"
           >
-            {/* Desktop View: Smooth Hover */}
-            <div className="hidden md:block absolute inset-0 p-8">
-              <Image
-                src={image}
-                alt={title}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 320px"
-                className={`object-contain transition-all duration-[1.5s] ease-[cubic-bezier(0.23,1,0.32,1)] p-4 ${!isLoaded ? "opacity-0 scale-95 blur-md" : "opacity-100 scale-100 blur-0"} ${hoverImage ? "group-hover/img:opacity-0 group-hover/img:scale-105 group-hover/img:-translate-x-3 group-hover/img:blur-sm" : "group-hover/img:opacity-90"}`}
-                onLoad={() => setIsLoaded(true)}
-              />
-              {hoverImage && (
+            {/* Unified Image Display: Carousel with Smooth Hover Effect for Desktop */}
+            <div className="absolute inset-0 p-4 md:p-8">
+              {carouselImages.map((img, idx) => (
                 <Image
-                  src={hoverImage}
-                  alt={`${title} - alternative view`}
+                  key={idx}
+                  src={img}
+                  alt={`${title} - view ${idx + 1}`}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 320px"
-                  className="object-contain opacity-0 group-hover/img:opacity-100 transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] scale-110 group-hover/img:scale-100 translate-x-3 group-hover/img:translate-x-0 p-4"
+                  className={`object-contain transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] p-4 ${
+                    idx === currentImgIdx 
+                      ? (isLoaded ? "opacity-100 scale-100 translate-x-0" : "opacity-0 scale-95") 
+                      : "opacity-0 scale-105 translate-x-4 pointer-events-none"
+                  } ${
+                    // Smooth Hover Effect for the first two images on desktop (No Blur)
+                    idx === 0 && carouselImages.length > 1 && currentImgIdx === 0
+                      ? "md:group-hover/img:opacity-0 md:group-hover/img:scale-105 md:group-hover/img:-translate-x-3"
+                      : ""
+                  } ${
+                    idx === 1 && carouselImages.length > 1 && currentImgIdx === 0
+                      ? "md:opacity-0 md:group-hover/img:opacity-100 md:group-hover/img:scale-100 md:group-hover/img:translate-x-0 md:scale-110 md:translate-x-3"
+                      : ""
+                  }`}
+                  onLoad={() => setIsLoaded(true)}
                 />
-              )}
-            </div>
-            {/* Mobile View: Carousel */}
-            <div className="md:hidden absolute inset-0">
-              {carouselImages.map((img, idx) => (
-                <div
-                  key={idx}
-                  className={`absolute inset-4 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${idx === currentImgIdx ? (isLoaded ? "opacity-100 translate-x-0" : "opacity-0 translate-x-0") : "opacity-0 translate-x-[15%]"}`}
-                >
-                  <Image
-                    src={img}
-                    alt={`${title} - view ${idx + 1}`}
-                    fill
-                    sizes="100vw"
-                    className="object-contain"
-                    onLoad={() => setIsLoaded(true)}
-                  />
-                </div>
               ))}
             </div>
             {label && (
@@ -271,29 +261,47 @@ export function ProductCard({
           </svg>
         </button>
 
-        {/* 3. Mobile Carousel Arrows - Moved here to be outside Link but over image */}
-        <div className="md:hidden">
-          {carouselImages.length > 1 && (
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-0 z-[35] pointer-events-none">
-              <button
-                onPointerDown={prevImage}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                type="button"
-                className="w-8 h-8 flex items-center justify-center bg-white/40 backdrop-blur-md text-black shadow-sm active:scale-90 transition-all pointer-events-auto touch-manipulation"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
-              </button>
-              <button
-                onPointerDown={nextImage}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                type="button"
-                className="w-8 h-8 flex items-center justify-center bg-white/40 backdrop-blur-md text-black shadow-sm active:scale-90 transition-all pointer-events-auto touch-manipulation"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
-              </button>
-            </div>
-          )}
-        </div>
+        {/* 3. Image Carousel Arrows - Minimal Tab Design (Centered) */}
+        {carouselImages.length > 1 && (
+          <div className="absolute inset-y-0 inset-x-0 flex items-center justify-between z-[40] pointer-events-none">
+            <button
+              onPointerDown={prevImage}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+              }}
+              type="button"
+              className="w-6 h-12 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-r-lg text-black/60 shadow-sm border border-black/5 transition-all pointer-events-auto touch-manipulation hover:text-black active:scale-95 opacity-100 md:opacity-0 md:group-hover/img:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+              aria-label="Previous image"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 18l-6-6 6-6" /></svg>
+            </button>
+            <button
+              onPointerDown={nextImage}
+              onClick={(e) => { 
+                e.preventDefault(); 
+                e.stopPropagation(); 
+              }}
+              type="button"
+              className="w-6 h-12 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-l-lg text-black/60 shadow-sm border border-black/5 transition-all pointer-events-auto touch-manipulation hover:text-black active:scale-95 opacity-100 md:opacity-0 md:group-hover/img:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+              aria-label="Next image"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M9 18l6-6-6-6" /></svg>
+            </button>
+          </div>
+        )}
+        
+        {/* Mobile Indicator Dots */}
+        {carouselImages.length > 1 && (
+          <div className="md:hidden absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1 z-30">
+            {carouselImages.map((_, i) => (
+              <div 
+                key={i} 
+                className={`w-1 h-1 rounded-full transition-all duration-300 ${i === currentImgIdx ? "bg-black w-3" : "bg-black/20"}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 4. Details Section (Title, Price under it, sizes below) */}

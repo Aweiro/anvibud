@@ -63,26 +63,30 @@ export function ProductSlider({ products, lang }: ProductSliderProps) {
     };
 
     return (
-        <div className="relative group/slider">
-            {/* Scroll Buttons - Enhanced Design */}
-            <div className="flex items-center gap-2 absolute -top-12 md:-top-14 right-0 z-40">
+        <div className="relative group/slider overflow-hidden">
+            {/* Desktop Side Navigation Arrows (Premium) */}
+            <div className="hidden md:flex absolute inset-y-0 left-0 right-0 items-center justify-between z-50 pointer-events-none px-2">
                 <button
                     onClick={() => scroll("left")}
                     disabled={!canScrollLeft}
-                    className={`w-8 h-8 flex items-center justify-center border border-black/10 transition-all ${!canScrollLeft ? "opacity-20 cursor-not-allowed" : "hover:bg-black hover:text-white hover:border-black active:scale-95"
+                    className={`w-12 h-12 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-xl border border-black/5 transition-all duration-500 pointer-events-auto text-black/60 ${!canScrollLeft
+                        ? "opacity-0 -translate-x-4 pointer-events-none"
+                        : "opacity-100 translate-x-0 hover:text-black active:scale-90"
                         }`}
                 >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <path d="M15 18l-6-6 6-6" />
                     </svg>
                 </button>
                 <button
                     onClick={() => scroll("right")}
                     disabled={!canScrollRight}
-                    className={`w-8 h-8 flex items-center justify-center border border-black/10 transition-all ${!canScrollRight ? "opacity-20 cursor-not-allowed" : "hover:bg-black hover:text-white hover:border-black active:scale-95"
+                    className={`w-12 h-12 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-xl border border-black/5 transition-all duration-500 pointer-events-auto text-black/60 ${!canScrollRight
+                        ? "opacity-0 translate-x-4 pointer-events-none"
+                        : "opacity-100 translate-x-0 hover:text-black active:scale-90"
                         }`}
                 >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                         <path d="M9 18l6-6-6-6" />
                     </svg>
                 </button>

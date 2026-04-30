@@ -38,7 +38,9 @@
         "price": "Price",
         "total": "Total",
         "language": "Language",
-        "updating": "Updating..."
+        "updating": "Updating...",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
     },
     "home": {
         "hero_title_1": "Quality",
@@ -139,7 +141,8 @@
         "empty_title": "No Saved Items",
         "empty_desc": "Items you save will appear here",
         "explore_archive": "Explore the Archive",
-        "clear_all": "Clear All"
+        "clear_all": "Clear All",
+        "clear_confirm": "Are you sure you want to clear your wishlist?"
     },
     "cart": {
         "title": "Cart",
@@ -149,6 +152,7 @@
         "empty_desc": "Add pieces to your library to begin",
         "archive_selection": "Archive Selection",
         "clear": "Clear",
+        "clear_all": "Clear All",
         "no_image": "No Image",
         "order_summary": "Order Summary",
         "subtotal": "Subtotal",
@@ -158,7 +162,8 @@
         "calculated_at_checkout": "Calculated at checkout",
         "proceed_to_checkout": "Proceed to Checkout",
         "continue_shopping": "Continue Shopping",
-        "shipping_promo": "Add ${amount} more for complimentary shipping"
+        "shipping_promo": "Add ${amount} more for complimentary shipping",
+        "clear_confirm": "Are you sure you want to clear your cart?"
     },
     "product": {
         "archival_item": "Archival Item",

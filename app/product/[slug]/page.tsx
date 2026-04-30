@@ -136,8 +136,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </div>
 
                 {/* Bottom Section: Details, Specs, Shipping */}
-                <div className="mt-16 pt-12 border-t border-black/5">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-24 mb-16">
+                <div className="mt-8 pt-6 border-t border-black/5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-24 mb-12">
                         <div className="space-y-6">
                             <h3 className="text-[11px] uppercase tracking-[0.4em] font-black border-b border-black pb-4 inline-block text-black">{t('product.description')}</h3>
                             <div className="text-xs font-light leading-loose text-black/70 whitespace-pre-wrap">
@@ -171,7 +171,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
                 {/* Related Products */}
                 {relatedProducts.length > 0 && (
-                    <div className="mt-16 border-t border-black/5 pt-12">
+                    <div className="mt-8 border-t border-black/5 pt-6">
                         <div className="flex items-center justify-between mb-8">
                             <h3 className="text-xl md:text-3xl font-black text-black uppercase tracking-tighter">{t('product.related_context')}</h3>
                         </div>

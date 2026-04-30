@@ -58,16 +58,16 @@ export function SubcategoryGrid({ categorySlug, subcategorySlug, subcategories, 
                         <Link 
                             key={sub.id} 
                             href={`/${categorySlug}/${sub.slug}`}
-                            className={`relative aspect-[4/3] md:w-48 bg-zinc-900 overflow-hidden group transition-all duration-500 ${isActive ? 'ring-2 ring-black ring-offset-2' : 'opacity-60 hover:opacity-100'}`}
+                            className={`relative aspect-[4/3] md:w-48 bg-zinc-100 overflow-hidden group transition-all duration-500 ${isActive ? 'ring-2 ring-black ring-offset-2 z-20 scale-105 shadow-xl' : 'opacity-100 hover:opacity-100 z-10'}`}
                         >
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 group-hover:bg-black/30 transition-colors z-10 px-2 text-center">
-                                <span className="text-[8px] md:text-[11px] font-black uppercase tracking-wider text-white leading-tight">{name}</span>
+                            <div className={`absolute inset-0 flex items-center justify-center transition-colors z-10 px-2 text-center ${isActive ? 'bg-black/40' : 'bg-black/30 group-hover:bg-black/20'}`}>
+                                <span className="text-[8px] md:text-[11px] font-black uppercase tracking-wider text-white leading-tight drop-shadow-md">{name}</span>
                             </div>
                             {sub.image ? (
                                 <img 
                                     src={sub.image} 
                                     alt={name}
-                                    className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${isActive ? 'grayscale-0' : 'grayscale'}`}
+                                    className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-110 grayscale-0"
                                 />
                             ) : (
                                 <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900" />

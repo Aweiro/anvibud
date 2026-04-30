@@ -24,6 +24,7 @@ type WishlistStore = {
     removeFromWishlist: (productId: string) => void;
     isWishlisted: (productId: string) => boolean;
     clearWishlist: () => void;
+    syncItems: (latestData: any[]) => void;
 };
 
 export const useWishlistStore = create<WishlistStore>()(
@@ -47,6 +48,20 @@ export const useWishlistStore = create<WishlistStore>()(
             },
             clearWishlist: () => {
                 set({ items: [] });
+            },
+            syncItems: (latestData) => {
+                set((state) => ({
+                    items: state.items.map((item) => {
+                        const latest = latestData.find(d => d.id === item.id);
+                        if (!latest) return item;
+                        return {
+                            ...item,
+                            price: latest.price,
+                            discountAmount: latest.discountAmount,
+                            sizeVariants: latest.sizeVariants,
+                        };
+                    })
+                }));
             },
         }),
         {

@@ -12,7 +12,19 @@ export function ProductActions({
     selectedSize,
     onSizeSelect
 }: {
-    product: { id: string; name: string; price: number; image?: string; slug: string; stock: number; isCustomOrder: boolean; label?: any };
+    product: { 
+        id: string; 
+        name: string; 
+        price: number; 
+        image?: string; 
+        slug: string; 
+        stock: number; 
+        isCustomOrder: boolean; 
+        label?: any;
+        discount?: number;
+        salePrice?: number;
+        discountAmount?: number;
+    };
     sizes?: string[];
     sizeVariants?: { size: string, price: string, salePrice?: string, stock?: string }[];
     selectedSize?: string | null;
@@ -38,9 +50,13 @@ export function ProductActions({
                 setCurrentPrice(vPrice);
             }
         } else {
-            setCurrentPrice(product.price);
+            // Default to product discounted price if available, else regular price
+            const baseDiscountAmount = product.discountAmount || 0;
+            const basePrice = product.price;
+            const baseSalePrice = product.salePrice || (baseDiscountAmount > 0 ? basePrice - baseDiscountAmount : product.price);
+            setCurrentPrice(baseSalePrice);
         }
-    }, [activeSize, sizeVariants, product.price]);
+    }, [activeSize, sizeVariants, product.price, product.discountAmount, product.salePrice]);
 
     useEffect(() => {
         setMounted(true);
@@ -78,7 +94,9 @@ export function ProductActions({
             addToWishlist({
                 id: product.id,
                 title: product.name,
-                price: product.price,
+                price: product.price, // Base price (original)
+                discount: product.discount || (product.discountAmount ? Math.round((product.discountAmount / product.price) * 100) : 0),
+                salePrice: product.salePrice,
                 image: product.image,
                 slug: product.slug,
                 label: product.label,

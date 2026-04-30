@@ -136,7 +136,7 @@ export function InfiniteProductGrid({
             )}
 
             {!hasMore && products.length > 0 && (
-                <div className="mt-20 text-center">
+                <div className="mt-10 text-center">
                     <div className="h-px bg-black/5 w-24 mx-auto mb-6" />
                     <p className="text-[10px] uppercase tracking-[0.4em] font-black text-black/20">
                         {t('common.end_of_library')}
