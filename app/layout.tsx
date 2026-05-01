@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 
 import { headers, cookies } from "next/headers";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
+import { detectLanguage } from "@/lib/i18n/detect-language";
 import NextTopLoader from 'nextjs-toploader';
 import { NavigationLoader } from "@/components/NavigationLoader";
 import { ToastContainer } from "@/components/ToastContainer";
@@ -33,7 +34,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
-  const lang = (cookieStore.get("migra_lang")?.value || "en") as any;
+  const savedLang = cookieStore.get("migra_lang")?.value;
+  const lang = (savedLang || (await detectLanguage())) as any;
 
   return (
     <html

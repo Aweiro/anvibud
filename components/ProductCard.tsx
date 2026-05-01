@@ -30,12 +30,10 @@ type ProductCardProps = {
   onRemove?: (id: string) => void;
 };
 
-const formatPrice = (price: number, currency: string) =>
-  new Intl.NumberFormat("uk-UA", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 0,
-  }).format(price);
+const formatPrice = (price: number, currency: string) => {
+  const formattedPrice = Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return `${formattedPrice} ₴`;
+};
 
 export function ProductCard({
   id,

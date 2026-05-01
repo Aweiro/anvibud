@@ -87,12 +87,10 @@ export function ProductInfoClient({ product, prodName }: ProductInfoClientProps)
     const hasDiscount = originalPrice > displayPrice;
     const discountPercent = hasDiscount ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100) : 0;
 
-    const formatPrice = (price: number) =>
-        new Intl.NumberFormat("uk-UA", {
-            style: "currency",
-            currency: "UAH",
-            minimumFractionDigits: 2,
-        }).format(price);
+    const formatPrice = (price: number) => {
+        const formattedPrice = Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        return `${formattedPrice} ₴`;
+    };
 
     return (
         <div className="sticky top-28 space-y-10">

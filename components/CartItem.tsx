@@ -9,11 +9,10 @@ type CartItemProps = {
   onRemove?: () => void;
 };
 
-const formatPrice = (price: number) =>
-  new Intl.NumberFormat("uk-UA", {
-    style: "currency",
-    currency: "UAH",
-  }).format(price);
+const formatPrice = (price: number) => {
+  const formattedPrice = Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return `${formattedPrice} ₴`;
+};
 
 export function CartItem({
   title,
