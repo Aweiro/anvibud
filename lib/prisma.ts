@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+// Updated after schema change
 
 const globalForPrisma = globalThis as unknown as {
 	prisma?: PrismaClient

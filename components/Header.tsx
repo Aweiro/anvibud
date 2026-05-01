@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+// Header component
 import { HeaderClient } from "./HeaderClient";
 
 export async function Header() {
@@ -16,5 +17,11 @@ export async function Header() {
         })
     ]);
 
-    return <HeaderClient categories={categories} settings={settings} />;
+    const serializedSettings = settings ? {
+        ...settings,
+        freeShippingThreshold: Number(settings.freeShippingThreshold),
+        shippingCost: Number(settings.shippingCost),
+    } : null;
+
+    return <HeaderClient categories={categories} settings={serializedSettings} />;
 }

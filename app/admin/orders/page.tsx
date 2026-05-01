@@ -183,17 +183,37 @@ export default function AdminOrdersPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="pt-4 border-t border-black/5 dark:border-white/5">
+                                            <div className="pt-4 border-t border-black/5 dark:border-white/5 space-y-4">
                                                 <div className="space-y-2">
                                                     {order.items.map((item: any) => (
-                                                        <div key={item.id} className="flex items-center justify-between text-xs">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="font-black text-black dark:text-white uppercase">{item.product.name}</span>
-                                                                {item.size && <span className="text-[10px] bg-black/5 px-2 py-0.5">SIZE: {item.size}</span>}
+                                                            <div key={item.id} className="flex items-center justify-between text-[11px] py-1">
+                                                                <div className="flex flex-col gap-1">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="font-black text-black dark:text-white uppercase leading-tight">{item.product.name}</span>
+                                                                        {item.size && <span className="text-[9px] bg-black/5 dark:bg-white/5 px-2 py-0.5 font-bold">SIZE: {item.size}</span>}
+                                                                    </div>
+                                                                    <div className="text-[9px] font-bold text-black/30 dark:text-white/30 uppercase tracking-widest">
+                                                                        {item.quantity > 1 ? (
+                                                                            <span>{parseFloat(item.unitPrice).toLocaleString()} ₴ × {item.quantity} = {parseFloat(item.total).toLocaleString()} ₴</span>
+                                                                        ) : (
+                                                                            <span>{parseFloat(item.unitPrice).toLocaleString()} ₴ за шт.</span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                                <span className="text-black dark:text-white font-black bg-black/5 dark:bg-white/5 w-8 h-8 flex items-center justify-center rounded-none text-[10px]">x{item.quantity}</span>
                                                             </div>
-                                                            <span className="text-black/40 dark:text-white/40">x{item.quantity}</span>
-                                                        </div>
                                                     ))}
+                                                </div>
+
+                                                <div className="flex flex-col gap-1 pt-4 border-t border-black/[0.03] dark:border-white/[0.03]">
+                                                    <div className="flex justify-between text-[9px] uppercase font-bold text-black/30 dark:text-white/30">
+                                                        <span>Subtotal</span>
+                                                        <span>{parseFloat(order.subtotal).toLocaleString()} ₴</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-[9px] uppercase font-bold text-black/30 dark:text-white/30">
+                                                        <span>Shipping</span>
+                                                        <span>{parseFloat(order.shippingCost) > 0 ? `${parseFloat(order.shippingCost).toLocaleString()} ₴` : "FREE"}</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

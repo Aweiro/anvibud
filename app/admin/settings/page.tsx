@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { getSiteSettings, updateSiteSettings } from "./actions";
 import { useToast } from "@/lib/stores/toast.store";
-import { Plus, X, Save, Settings2, Sparkles } from "lucide-react";
+import { Plus, X, Save, Settings2, Sparkles, Truck } from "lucide-react";
 import { aiTranslateAction } from "../actions/ai_actions";
 
 export default function SettingsPage() {
@@ -14,6 +14,8 @@ export default function SettingsPage() {
     const [announcementSpeed, setAnnouncementSpeed] = useState(30);
     const [announcementItems, setAnnouncementItems] = useState<any[]>([]);
     const [isTranslating, setIsTranslating] = useState<number | null>(null);
+    const [freeShippingThreshold, setFreeShippingThreshold] = useState<number | string>(200);
+    const [shippingCost, setShippingCost] = useState<number | string>(0);
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -29,6 +31,8 @@ export default function SettingsPage() {
                 setAnnouncementTextColor(data.announcementTextColor || "#ffffff");
                 setAnnouncementSpeed(data.announcementSpeed || 30);
                 setAnnouncementItems(Array.isArray(data.announcementItems) ? data.announcementItems : []);
+                setFreeShippingThreshold(Number(data.freeShippingThreshold) || 200);
+                setShippingCost(Number(data.shippingCost) || 0);
             }
             setLoading(false);
         }
@@ -50,7 +54,7 @@ export default function SettingsPage() {
     };
 
     const addAnnouncementItem = () => {
-        setAnnouncementItems([...announcementItems, { text_uk: "", text_ru: "", text_pl: "", text_en: "", link: "" }]);
+        setAnnouncementItems([...announcementItems, { text_uk: "", text_pl: "", text_en: "", link: "" }]);
     };
 
     const removeAnnouncementItem = (index: number) => {
@@ -65,7 +69,7 @@ export default function SettingsPage() {
 
     const handleAnnouncementAiTranslate = async (index: number) => {
         const item = announcementItems[index];
-        const sourceText = item.text_uk || item.text_en || item.text_ru || item.text_pl;
+        const sourceText = item.text_uk || item.text_en || item.text_pl;
 
         if (!sourceText) {
             showToast("INPUT_PRIMARY_SOURCE_FIRST", "warning");
@@ -81,7 +85,6 @@ export default function SettingsPage() {
                     ...newItems[index],
                     text_en: result.data.en || newItems[index].text_en,
                     text_uk: result.data.uk || newItems[index].text_uk,
-                    text_ru: result.data.ru || newItems[index].text_ru,
                     text_pl: result.data.pl || newItems[index].text_pl,
                 };
                 setAnnouncementItems(newItems);
@@ -104,8 +107,10 @@ export default function SettingsPage() {
             announcementTextColor,
             announcementSpeed,
             announcementItems: announcementItems.filter(item => 
-                item.text_uk.trim() || item.text_ru.trim() || item.text_pl.trim() || item.text_en.trim()
-            )
+                item.text_uk.trim() || item.text_pl.trim() || item.text_en.trim()
+            ),
+            freeShippingThreshold: Number(freeShippingThreshold) || 0,
+            shippingCost: Number(shippingCost) || 0
         });
         
         if (result.success) {
@@ -258,16 +263,6 @@ export default function SettingsPage() {
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-[8px] font-black uppercase tracking-widest text-black/40 dark:text-white/40">RU (Русский)</label>
-                                                    <input 
-                                                        type="text" 
-                                                        value={item.text_ru} 
-                                                        onChange={(e) => updateAnnouncementItem(i, 'text_ru', e.target.value)}
-                                                        placeholder="Введите текст..."
-                                                        className="w-full bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 px-4 py-2 text-xs font-bold text-black dark:text-white outline-none"
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
                                                     <label className="text-[8px] font-black uppercase tracking-widest text-black/40 dark:text-white/40">PL (Polski)</label>
                                                     <input 
                                                         type="text" 
@@ -352,6 +347,46 @@ export default function SettingsPage() {
                                 </button>
                             </div>
                         ))}
+                    </div>
+                </section>
+
+                {/* Shipping Settings Section */}
+                <section className="bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 p-8 md:p-12 space-y-10">
+                    <div className="space-y-1">
+                        <h3 className="text-lg font-black uppercase tracking-tight flex items-center gap-2">
+                            <Truck size={20} />
+                            Logistics_Config_Module
+                        </h3>
+                        <p className="text-[10px] uppercase font-bold tracking-widest text-black/40">Manage shipping costs and free delivery thresholds</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-black/40 dark:text-white/40">Free_Shipping_Threshold (₴)</label>
+                            <input 
+                                type="number" 
+                                value={freeShippingThreshold} 
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/^0+(?=\d)/, '');
+                                    setFreeShippingThreshold(val);
+                                }}
+                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                                className="w-full bg-transparent border border-black/10 dark:border-white/10 px-4 py-3 text-xs font-bold font-mono text-black dark:text-white outline-none"
+                            />
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-black/40 dark:text-white/40">Standard_Shipping_Cost (₴)</label>
+                            <input 
+                                type="number" 
+                                value={shippingCost} 
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/^0+(?=\d)/, '');
+                                    setShippingCost(val);
+                                }}
+                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                                className="w-full bg-transparent border border-black/10 dark:border-white/10 px-4 py-3 text-xs font-bold font-mono text-black dark:text-white outline-none"
+                            />
+                        </div>
                     </div>
                 </section>
 

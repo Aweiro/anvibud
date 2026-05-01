@@ -87,6 +87,13 @@ export function ProductInfoClient({ product, prodName }: ProductInfoClientProps)
     const hasDiscount = originalPrice > displayPrice;
     const discountPercent = hasDiscount ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100) : 0;
 
+    const formatPrice = (price: number) =>
+        new Intl.NumberFormat("uk-UA", {
+            style: "currency",
+            currency: "UAH",
+            minimumFractionDigits: 2,
+        }).format(price);
+
     return (
         <div className="sticky top-28 space-y-10">
             {/* Title & Price */}
@@ -97,12 +104,12 @@ export function ProductInfoClient({ product, prodName }: ProductInfoClientProps)
 
                 <div className="flex items-baseline gap-4 text-black">
                     <span className="text-2xl font-bold tracking-widest text-black">
-                        ₴{displayPrice.toFixed(2)}
+                        {formatPrice(displayPrice)}
                     </span>
                     {hasDiscount && (
                         <>
                             <span className="text-sm text-black/30 line-through tracking-widest">
-                                ₴{originalPrice.toFixed(2)}
+                                {formatPrice(originalPrice)}
                             </span>
                             <span className="text-[10px] uppercase tracking-widest font-bold text-red-500">
                                 {discountPercent}% {t('product.off')}

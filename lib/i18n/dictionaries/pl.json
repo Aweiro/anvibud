@@ -158,7 +158,7 @@
         "spec_2": "Wyprodukowano etycznie w Europie",
         "spec_3": "Kontekstowe dopasowanie (Standardowa rozmiarówka)",
         "spec_ref": "Kod produktu",
-        "shipping_desc_1": "Bezpłatna wysyłka ekspresowa dla wszystkich zamówień powyżej $200.",
+        "shipping_desc_1": "Bezpłatna ekspresowa wysyłka dla wszystkich zamówień powyżej 200 ₴.",
         "shipping_desc_2": "14-dniowa polityka zwrotów archiwalnych. Produkty muszą być nienoszone i posiadać wszystkie metki.",
         "related_context": "Podobne produkty"
     },
@@ -171,7 +171,7 @@
         "phone_number": "Numer Telefonu",
         "name_placeholder": "IVAN IVANOV",
         "processing": "Przetwarzanie...",
-        "complete_purchase": "Zakończ Zakup — $",
+        "complete_purchase": "Zakończ Zakup —",
         "terms_agreement": "Klikając zakończ, akceptujesz nasze warunki dostawy sezonowej.",
         "error_details": "Proszę sprawdzić swoje dane.",
         "error_generic": "Coś poszło nie tak. Proszę spróbować ponownie.",

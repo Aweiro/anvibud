@@ -15,7 +15,12 @@ export async function getSiteSettings() {
             });
         }
 
-        return settings;
+        // Serialize Decimal fields to numbers
+        return {
+            ...settings,
+            freeShippingThreshold: Number(settings.freeShippingThreshold),
+            shippingCost: Number(settings.shippingCost),
+        };
     } catch (error) {
         console.error("Error fetching site settings:", error);
         return null;
@@ -29,6 +34,8 @@ export async function updateSiteSettings(data: {
     announcementTextColor?: string;
     announcementSpeed?: number;
     announcementItems?: any;
+    freeShippingThreshold?: number;
+    shippingCost?: number;
 }) {
     try {
         await prisma.siteSettings.upsert({

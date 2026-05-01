@@ -27,7 +27,6 @@ export async function GET(request: Request) {
     whereClause.OR = [
       { name: { contains: search, mode: 'insensitive' } },
       { name_uk: { contains: search, mode: 'insensitive' } },
-      { name_ru: { contains: search, mode: 'insensitive' } },
       { name_pl: { contains: search, mode: 'insensitive' } },
       { brand: { contains: search, mode: 'insensitive' } },
     ];

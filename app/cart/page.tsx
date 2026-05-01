@@ -9,6 +9,7 @@ import { Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getLatestPrices } from "@/lib/actions/products.actions";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { getSiteSettings } from "../admin/settings/actions";
 import { CheckoutModal } from "@/components/CheckoutModal";
 
 export default function CartPage() {
@@ -22,10 +23,20 @@ export default function CartPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasSynced, setHasSynced] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [shippingThreshold, setShippingThreshold] = useState(200);
+  const [shippingCost, setShippingCost] = useState(0);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    async function loadSettings() {
+      const settings = await getSiteSettings();
+      if (settings) {
+        setShippingThreshold(Number(settings.freeShippingThreshold) || 200);
+        setShippingCost(Number(settings.shippingCost) || 0);
+      }
+    }
+    loadSettings();
   }, []);
 
   useEffect(() => {
@@ -57,7 +68,7 @@ export default function CartPage() {
   return (
     <main className="flex-1 flex flex-col min-h-screen justify-between bg-white pt-6 border-t border-black/[0.03]">
       <div className="mx-auto w-full max-w-[1500px] px-6 mb-8 md:mb-16">
-        
+
         {/* Refined Responsive Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-black/[0.1] pb-6 mb-8 gap-6">
           <nav className="flex flex-wrap items-center gap-y-2 gap-x-3 text-[9px] uppercase tracking-[0.3em] font-black">
@@ -163,7 +174,7 @@ export default function CartPage() {
                             className="w-8 h-full flex items-center justify-center text-black/40 hover:text-black text-base"
                           >+</button>
                         </div>
-                        
+
                         <div className="text-right">
                           <span className="block text-[8px] uppercase tracking-[0.2em] font-bold text-black/20 mb-0.5">Total</span>
                           <span className="text-[11px] font-black tracking-widest text-black">
@@ -225,12 +236,16 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between text-[10px] uppercase tracking-[0.2em] font-bold text-black/40">
                   <span>{t('cart.shipping')}</span>
-                  <span className="text-green-600 uppercase font-black tracking-widest">{t('cart.free')}</span>
+                  {totalPrice >= shippingThreshold ? (
+                    <span className="text-green-600 uppercase font-black tracking-widest">{t('cart.free')}</span>
+                  ) : (
+                    <span className="text-black uppercase font-black tracking-widest">₴{shippingCost.toFixed(2)}</span>
+                  )}
                 </div>
-                {totalPrice < 200 && (
+                {totalPrice < shippingThreshold && (
                   <div className="bg-zinc-50 p-4 border-l-2 border-black/10">
                     <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-black/40 leading-relaxed">
-                      {t('cart.shipping_promo').replace('${amount}', (200 - totalPrice).toFixed(2))}
+                      {t('cart.shipping_promo').replace('${amount}', (shippingThreshold - totalPrice).toFixed(2))}
                     </p>
                   </div>
                 )}
@@ -239,7 +254,9 @@ export default function CartPage() {
               <div className="pt-8 border-t border-black pb-4">
                 <div className="flex justify-between items-end mb-8">
                   <span className="text-[11px] uppercase tracking-[0.5em] font-black text-black">{t('cart.total')}</span>
-                  <span className="text-2xl font-black tracking-tighter text-black leading-none">₴{totalPrice.toFixed(2)}</span>
+                  <span className="text-2xl font-black tracking-tighter text-black leading-none">
+                    ₴{(totalPrice + (totalPrice >= shippingThreshold ? 0 : shippingCost)).toFixed(2)}
+                  </span>
                 </div>
                 <button 
                   onClick={() => setIsCheckoutOpen(true)}

@@ -8,7 +8,6 @@ interface Category {
     id: string;
     name: string;
     name_uk?: string | null;
-    name_ru?: string | null;
     name_pl?: string | null;
     slug: string;
     image?: string | null;

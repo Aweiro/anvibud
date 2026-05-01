@@ -31,7 +31,7 @@ type ProductCardProps = {
 };
 
 const formatPrice = (price: number, currency: string) =>
-  new Intl.NumberFormat("en-US", {
+  new Intl.NumberFormat("uk-UA", {
     style: "currency",
     currency,
     minimumFractionDigits: 0,
@@ -46,7 +46,7 @@ export function ProductCard({
   hoverImage,
   allImages = [],
   discountAmount = 0,
-  currency = "USD",
+  currency = "UAH",
   className = "",
   sizes = [],
   label,

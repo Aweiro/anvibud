@@ -36,20 +36,16 @@ async function adjustStock(productId: string, size: string | null, quantity: num
 }
 
 export async function createOrder(data: CheckoutInput) {
-    const subtotal = data.items.reduce(
-        (total, item) => total + item.price * item.quantity,
-        0,
-    );
-
     // Use transaction to ensure order and stock update happen together
     return prisma.$transaction(async (tx) => {
         const order = await tx.order.create({
             data: {
                 customerName: data.name,
                 customerPhone: data.phone,
-                subtotal,
+                subtotal: data.subtotal,
                 discountTotal: 0,
-                total: subtotal,
+                shippingCost: data.shippingCost,
+                total: data.total,
                 items: {
                     create: data.items.map((item) => ({
                         productId: item.productId,

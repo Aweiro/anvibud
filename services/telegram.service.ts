@@ -1,24 +1,17 @@
 import type { CheckoutInput } from "@/lib/validations/checkout";
 
 const formatPrice = (price: number) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(price);
+  `${price.toFixed(2)} ₴`;
 
 export function formatOrderMessage(data: CheckoutInput) {
   const items = data.items
     .map(
       (item, index) =>
-        `${index + 1}. Product: ${item.productId}\nQuantity: ${item.quantity}\nPrice: ${formatPrice(item.price)}\nTotal: ${formatPrice(item.price * item.quantity)}`,
+        `${index + 1}. Item ID: ${item.productId}${item.size ? ` (Size: ${item.size})` : ''}\nQty: ${item.quantity} x ${formatPrice(item.price)} = ${formatPrice(item.price * item.quantity)}`,
     )
     .join("\n\n");
-  const total = data.items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
 
-  return `New order\n\nName: ${data.name}\nPhone: ${data.phone}\n\nItems:\n${items}\n\nTotal: ${formatPrice(total)}`;
+  return `📦 NEW_ORDER_RECEIVED\n\n👤 CUSTOMER: ${data.name}\n📞 PHONE: ${data.phone}\n\n🛒 ITEMS:\n${items}\n\n------------------\n💰 SUBTOTAL: ${formatPrice(data.subtotal)}\n🚚 SHIPPING: ${data.shippingCost > 0 ? formatPrice(data.shippingCost) : "FREE"}\n💎 TOTAL: ${formatPrice(data.total)}`;
 }
 
 export async function sendOrderToTelegram(data: CheckoutInput) {

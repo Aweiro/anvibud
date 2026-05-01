@@ -36,7 +36,6 @@ export default function CategoryForm({
     const [names, setNames] = useState<Record<string, string>>({
         en: item?.name || "",
         uk: item?.name_uk || "",
-        ru: item?.name_ru || "",
         pl: item?.name_pl || "",
     });
     const [isTranslating, setIsTranslating] = useState(false);
@@ -154,7 +153,6 @@ export default function CategoryForm({
         const formData = new FormData(form);
         formData.set("name", names.en);
         formData.set("name_uk", names.uk);
-        formData.set("name_ru", names.ru);
         formData.set("name_pl", names.pl);
 
         if (activeTab === "subcategory") {
@@ -267,7 +265,6 @@ export default function CategoryForm({
                         {[
                             { id: "en", label: "EN" },
                             { id: "uk", label: "UA" },
-                            { id: "ru", label: "RU" },
                             { id: "pl", label: "PL" },
                         ].map(lang => (
                             <button
@@ -302,7 +299,6 @@ export default function CategoryForm({
                             {[
                                 { id: "en", label: "EN" },
                                 { id: "uk", label: "UA" },
-                                { id: "ru", label: "RU" },
                                 { id: "pl", label: "PL" },
                             ].map(lang => (
                                 <input

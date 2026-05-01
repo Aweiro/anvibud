@@ -13,7 +13,6 @@ type Subcategory = {
     id: string;
     name: string;
     name_uk?: string | null;
-    name_ru?: string | null;
     name_pl?: string | null;
     slug: string;
     image?: string | null;
@@ -22,7 +21,6 @@ type Category = {
     id: string;
     name: string;
     name_uk?: string | null;
-    name_ru?: string | null;
     name_pl?: string | null;
     slug: string;
     subcategories: Subcategory[];
@@ -214,7 +212,7 @@ export function HeaderClient({
                                 </button>
                                 <div className="absolute top-full right-0 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[10001]">
                                     <div className="bg-white border border-black/10 shadow-xl py-1 min-w-[80px]">
-                                        {['en', 'uk', 'ru', 'pl'].map((lang) => (
+                                        {['en', 'uk', 'pl'].map((lang) => (
                                             <button
                                                 key={lang}
                                                 onClick={() => setLanguage(lang as any)}
@@ -542,7 +540,7 @@ export function HeaderClient({
                         </div>
 
                         <div className="p-6 bg-zinc-50 border-t border-zinc-100 grid grid-cols-4 gap-2">
-                            {['en', 'uk', 'ru', 'pl'].map((lang) => (
+                            {['en', 'uk', 'pl'].map((lang) => (
                                 <button
                                     key={lang}
                                     onClick={() => setLanguage(lang as any)}

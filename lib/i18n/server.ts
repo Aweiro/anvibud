@@ -1,10 +1,9 @@
 import { cookies } from "next/headers";
 import en from "./dictionaries/en.json";
 import uk from "./dictionaries/uk.json";
-import ru from "./dictionaries/ru.json";
 import pl from "./dictionaries/pl.json";
 
-const dictionaries: any = { en, uk, ru, pl };
+const dictionaries: any = { en, uk, pl };
 
 export async function getServerTranslation() {
     const cookieStore = await cookies();

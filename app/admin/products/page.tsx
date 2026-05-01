@@ -139,10 +139,10 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
                                         </td>
                                         <td className="px-6 py-6">
                                             <div className="text-[11px] font-black tracking-widest text-black dark:text-white">
-                                                ${(Number(product.price) - Number(product.discountAmount)).toFixed(2)}
+                                                {(Number(product.price) - Number(product.discountAmount)).toFixed(2)} ₴
                                                 {Number(product.discountAmount) > 0 && (
                                                     <span className="ml-2 text-[9px] text-black/20 dark:text-white/20 line-through tracking-normal font-normal">
-                                                        ${Number(product.price).toFixed(2)}
+                                                        {Number(product.price).toFixed(2)} ₴
                                                     </span>
                                                 )}
                                             </div>
@@ -236,10 +236,10 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
                                     <div className="space-y-1">
                                         <span className="text-[8px] uppercase font-black text-black/30 dark:text-white/30 tracking-widest">Market Value</span>
                                         <div className="text-[11px] font-black text-black dark:text-white tracking-widest">
-                                            ${(Number(product.price) - Number(product.discountAmount)).toFixed(2)}
+                                            {(Number(product.price) - Number(product.discountAmount)).toFixed(2)} ₴
                                             {Number(product.discountAmount) > 0 && (
                                                 <span className="ml-2 text-[8px] text-black/20 dark:text-white/20 line-through tracking-normal font-normal">
-                                                    ${Number(product.price).toFixed(2)}
+                                                    {Number(product.price).toFixed(2)} ₴
                                                 </span>
                                             )}
                                         </div>

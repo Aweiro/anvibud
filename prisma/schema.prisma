@@ -24,7 +24,6 @@ model Category {
   id            String        @id @default(cuid())
   name          String
   name_uk       String?
-  name_ru       String?
   name_pl       String?
   slug          String        @unique
   image         String?
@@ -37,7 +36,6 @@ model Subcategory {
   id         String    @id @default(cuid())
   name       String
   name_uk    String?
-  name_ru    String?
   name_pl    String?
   slug       String    @unique
   image      String?
@@ -60,12 +58,10 @@ model Product {
   id                String        @id @default(cuid())
   name              String
   name_uk           String?
-  name_ru           String?
   name_pl           String?
   slug              String        @unique
   description       String?
   description_uk    String?
-  description_ru    String?
   description_pl    String?
   price             Decimal       @db.Decimal(10, 2)
   discountAmount    Decimal       @default(0) @db.Decimal(10, 2)
@@ -95,6 +91,7 @@ model Order {
   status        OrderStatus @default(PENDING)
   subtotal      Decimal     @db.Decimal(10, 2)
   discountTotal Decimal     @default(0) @db.Decimal(10, 2)
+  shippingCost  Decimal     @default(0) @db.Decimal(10, 2)
   total         Decimal     @db.Decimal(10, 2)
   items         OrderItem[]
   createdAt     DateTime    @default(now())
@@ -128,7 +125,10 @@ model SiteSettings {
   announcementBgColor   String?  @default("#000000")
   announcementTextColor String?  @default("#ffffff")
   announcementSpeed     Int?     @default(30)
-  announcementItems     Json?    // Array of { text_uk, text_ru, text_pl, text_en, link }
+  announcementItems     Json?    // Array of { text_uk, text_pl, text_en, link }
+
+  freeShippingThreshold Decimal  @default(200) @db.Decimal(10, 2)
+  shippingCost          Decimal  @default(0) @db.Decimal(10, 2)
 
   updatedAt          DateTime @updatedAt
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Header } from "@/components/Header";
 
@@ -62,6 +63,20 @@ export default async function RootLayout({
           </div>
           <ToastContainer />
         </LanguageProvider>
+
+        <Script
+          id="prevent-number-scroll"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              document.addEventListener('wheel', function(e) {
+                if (document.activeElement && document.activeElement.type === 'number') {
+                  document.activeElement.blur();
+                }
+              }, { passive: true });
+            `
+          }}
+        />
       </body>
     </html>
   );

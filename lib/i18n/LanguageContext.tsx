@@ -3,15 +3,13 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import en from "./dictionaries/en.json";
 import uk from "./dictionaries/uk.json";
-import ru from "./dictionaries/ru.json";
 import pl from "./dictionaries/pl.json";
 
-type Language = "en" | "uk" | "ru" | "pl";
+type Language = "en" | "uk" | "pl";
 
 const dictionaries = {
     en,
     uk,
-    ru,
     pl,
 };
 

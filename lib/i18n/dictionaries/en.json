@@ -176,7 +176,7 @@
         "spec_2": "Manufactured ethically in Europe",
         "spec_3": "Contextual fit (True to size)",
         "spec_ref": "Product Ref",
-        "shipping_desc_1": "Complimentary express shipping on all orders over $200.",
+        "shipping_desc_1": "Complimentary express shipping on all orders over 200 ₴.",
         "shipping_desc_2": "14-day archival return policy. Items must be unworn with all tags attached.",
         "related_context": "Related Context"
     },
@@ -189,7 +189,7 @@
         "phone_number": "Phone Number",
         "name_placeholder": "IVAN IVANOV",
         "processing": "Processing...",
-        "complete_purchase": "Complete Purchase — $",
+        "complete_purchase": "Complete Purchase —",
         "terms_agreement": "By clicking complete you agree to our terms and conditions of seasonal delivery.",
         "error_details": "Please check your details.",
         "error_generic": "Something went wrong. Please try again.",

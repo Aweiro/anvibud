@@ -11,6 +11,9 @@ export const checkoutSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters"),
   phone: z.string().trim().min(7, "Phone must be at least 7 characters"),
   items: z.array(checkoutItemSchema).min(1, "Cart is empty"),
+  shippingCost: z.number().nonnegative().default(0),
+  subtotal: z.number().nonnegative(),
+  total: z.number().nonnegative(),
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

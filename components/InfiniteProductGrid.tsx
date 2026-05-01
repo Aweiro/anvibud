@@ -10,7 +10,6 @@ interface Product {
     id: string;
     name: string;
     name_uk?: string;
-    name_ru?: string;
     name_pl?: string;
     slug: string;
     price: number | string;

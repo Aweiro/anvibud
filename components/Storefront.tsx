@@ -33,7 +33,6 @@ interface Product {
     id: string;
     name: string;
     name_uk?: string;
-    name_ru?: string;
     name_pl?: string;
     slug: string;
     price: number | string;
@@ -49,7 +48,6 @@ interface Category {
     id: string;
     name: string;
     name_uk?: string | null;
-    name_ru?: string | null;
     name_pl?: string | null;
     slug: string;
     image?: string | null;
@@ -90,7 +88,6 @@ export async function Storefront({
         whereClause.OR = [
             { name: { contains: searchQuery, mode: 'insensitive' } },
             { name_uk: { contains: searchQuery, mode: 'insensitive' } },
-            { name_ru: { contains: searchQuery, mode: 'insensitive' } },
             { name_pl: { contains: searchQuery, mode: 'insensitive' } },
             { brand: { contains: searchQuery, mode: 'insensitive' } },
         ];
@@ -259,7 +256,6 @@ export async function Storefront({
             id: true, 
             name: true, 
             name_uk: true, 
-            name_ru: true, 
             name_pl: true, 
             slug: true, 
             image: true,
@@ -268,7 +264,6 @@ export async function Storefront({
                     id: true,
                     name: true,
                     name_uk: true,
-                    name_ru: true,
                     name_pl: true,
                     slug: true,
                     image: true

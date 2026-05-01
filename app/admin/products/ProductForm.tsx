@@ -35,13 +35,11 @@ export default function ProductForm({
     const [names, setNames] = useState<Record<string, string>>({
         en: product?.name || "",
         uk: product?.name_uk || "",
-        ru: product?.name_ru || "",
         pl: product?.name_pl || "",
     });
     const [descriptions, setDescriptions] = useState<Record<string, string>>({
         en: product?.description || "",
         uk: product?.description_uk || "",
-        ru: product?.description_ru || "",
         pl: product?.description_pl || "",
     });
     const [isTranslating, setIsTranslating] = useState(false);
@@ -252,12 +250,10 @@ export default function ProductForm({
         const formData = new FormData(form);
         formData.set("name", names.en);
         formData.set("name_uk", names.uk);
-        formData.set("name_ru", names.ru);
         formData.set("name_pl", names.pl);
 
         formData.set("description", descriptions.en);
         formData.set("description_uk", descriptions.uk);
-        formData.set("description_ru", descriptions.ru);
         formData.set("description_pl", descriptions.pl);
 
         formData.set("subcategoryId", selectedSubcategoryId);
@@ -291,8 +287,8 @@ export default function ProductForm({
                 showToast(isEdit ? "MODIFICATION_COMMITTED_SUCCESSFULLY" : "ENTRY_COMMITTED_SUCCESSFULLY", "success");
                 if (!isEdit) {
                     formRef.current?.reset();
-                    setNames({ en: "", uk: "", ru: "", pl: "" });
-                    setDescriptions({ en: "", uk: "", ru: "", pl: "" });
+                    setNames({ en: "", uk: "", pl: "" });
+                    setDescriptions({ en: "", uk: "", pl: "" });
                     setNewImages([]);
                     setPreviews([]);
                     setSelectedCategoryId("");
@@ -319,7 +315,6 @@ export default function ProductForm({
     const languages = [
         { id: "en", label: "EN" },
         { id: "uk", label: "UA" },
-        { id: "ru", label: "RU" },
         { id: "pl", label: "PL" },
     ];
 

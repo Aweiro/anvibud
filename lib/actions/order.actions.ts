@@ -56,6 +56,7 @@ export async function getOrders() {
             total: order.total.toString(),
             subtotal: order.subtotal.toString(),
             discountTotal: order.discountTotal.toString(),
+            shippingCost: order.shippingCost.toString(),
             items: order.items.map(item => ({
                 ...item,
                 unitPrice: item.unitPrice.toString(),
@@ -113,7 +114,8 @@ export async function updateOrderStatus(id: string, status: any) {
             ...updatedOrder,
             total: updatedOrder.total.toString(),
             subtotal: updatedOrder.subtotal.toString(),
-            discountTotal: updatedOrder.discountTotal.toString()
+            discountTotal: updatedOrder.discountTotal.toString(),
+            shippingCost: updatedOrder.shippingCost.toString()
         };
 
         revalidatePath("/admin/orders");

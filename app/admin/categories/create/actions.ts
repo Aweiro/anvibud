@@ -21,7 +21,6 @@ export async function createCategory(formData: FormData) {
             data: {
                 name,
                 name_uk: (formData.get("name_uk") as string) || null,
-                name_ru: (formData.get("name_ru") as string) || null,
                 name_pl: (formData.get("name_pl") as string) || null,
                 slug,
                 image: imageUrl,
@@ -58,7 +57,6 @@ export async function createSubcategory(formData: FormData) {
             data: {
                 name,
                 name_uk: (formData.get("name_uk") as string) || null,
-                name_ru: (formData.get("name_ru") as string) || null,
                 name_pl: (formData.get("name_pl") as string) || null,
                 slug,
                 image: imageUrl,
@@ -86,7 +84,6 @@ export async function updateCategory(id: string, formData: FormData) {
         let dataToUpdate: any = {
             name,
             name_uk: (formData.get("name_uk") as string) || null,
-            name_ru: (formData.get("name_ru") as string) || null,
             name_pl: (formData.get("name_pl") as string) || null,
             slug
         };
@@ -130,7 +127,6 @@ export async function updateSubcategory(id: string, formData: FormData) {
         let dataToUpdate: any = {
             name,
             name_uk: (formData.get("name_uk") as string) || null,
-            name_ru: (formData.get("name_ru") as string) || null,
             name_pl: (formData.get("name_pl") as string) || null,
             slug,
             category: { connect: { id: categoryId } },

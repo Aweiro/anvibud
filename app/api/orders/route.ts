@@ -25,12 +25,14 @@ export async function POST(request: Request) {
       console.error("TELEGRAM_NOTIFICATION_ERROR:", tgError);
     }
 
-    // Serialize order to handle Decimal types
-    const serializedOrder = JSON.parse(JSON.stringify(order, (key, value) =>
-      typeof value === 'object' && value !== null && value.constructor.name === 'Decimal'
-        ? value.toString()
-        : value
-    ));
+    // Serialize order to handle Decimal types robustly
+    const serializedOrder = JSON.parse(JSON.stringify(order, (key, value) => {
+      // Check if it's a Prisma Decimal (they have a specific structure or .toFixed/.toString method)
+      if (value && typeof value === 'object' && (value.constructor?.name === 'Decimal' || value.s !== undefined && value.d !== undefined)) {
+        return value.toString();
+      }
+      return value;
+    }));
 
     return Response.json({ order: serializedOrder }, { status: 201 });
   } catch (error: any) {

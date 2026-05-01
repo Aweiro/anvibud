@@ -8,14 +8,12 @@ export async function submitProduct(formData: FormData) {
   try {
     const name = formData.get("name") as string;
     const name_uk = formData.get("name_uk") as string;
-    const name_ru = formData.get("name_ru") as string;
     const name_pl = formData.get("name_pl") as string;
 
     const slug = formData.get("slug") as string;
 
     const description = formData.get("description") as string;
     const description_uk = formData.get("description_uk") as string;
-    const description_ru = formData.get("description_ru") as string;
     const description_pl = formData.get("description_pl") as string;
     const priceStr = formData.get("price") as string;
     const salePriceStr = formData.get("salePrice") as string;
@@ -70,12 +68,10 @@ export async function submitProduct(formData: FormData) {
     await createProduct({
       name,
       name_uk,
-      name_ru,
       name_pl,
       slug,
       description,
       description_uk,
-      description_ru,
       description_pl,
       price,
       stock,
@@ -109,14 +105,12 @@ export async function editProductAction(id: string, formData: FormData, existing
   try {
     const name = formData.get("name") as string;
     const name_uk = formData.get("name_uk") as string;
-    const name_ru = formData.get("name_ru") as string;
     const name_pl = formData.get("name_pl") as string;
 
     const slug = formData.get("slug") as string;
 
     const description = formData.get("description") as string;
     const description_uk = formData.get("description_uk") as string;
-    const description_ru = formData.get("description_ru") as string;
     const description_pl = formData.get("description_pl") as string;
     const priceStr = formData.get("price") as string;
     const salePriceStr = formData.get("salePrice") as string;
@@ -174,12 +168,10 @@ export async function editProductAction(id: string, formData: FormData, existing
       data: {
         name,
         name_uk,
-        name_ru,
         name_pl,
         slug,
         description,
         description_uk,
-        description_ru,
         description_pl,
         price,
         stock,

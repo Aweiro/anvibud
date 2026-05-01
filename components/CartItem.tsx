@@ -10,9 +10,9 @@ type CartItemProps = {
 };
 
 const formatPrice = (price: number) =>
-  new Intl.NumberFormat("en-US", {
+  new Intl.NumberFormat("uk-UA", {
     style: "currency",
-    currency: "USD",
+    currency: "UAH",
   }).format(price);
 
 export function CartItem({
